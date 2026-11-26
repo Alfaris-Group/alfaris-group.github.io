@@ -38,7 +38,12 @@
           "Localised dua references",
           "Alfaris Labs about page"
         ]
-      }
+      },
+      "screens": [
+        "shots/noor-1.jpg",
+        "shots/noor-2.jpg",
+        "shots/noor-3.jpg"
+      ]
     },
     {
       "id": "oven",

@@ -38,6 +38,10 @@ h2{font-size:21px}
 .dl:active{transform:scale(.98)}
 .ghost{background:#ffffff14;border:1px solid var(--line);color:var(--txt);padding:11px 16px;border-radius:14px;font-size:14px;cursor:pointer}
 .soon{display:inline-block;background:#f2c14e22;color:var(--gold);border:1px solid #f2c14e55;padding:6px 14px;border-radius:999px;font-weight:700;font-size:14px}
+.shots{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;margin-top:6px}
+.shots img{height:300px;width:auto;border-radius:16px;border:1px solid var(--line);scroll-snap-align:start;cursor:zoom-in;flex:none}
+.lb{position:fixed;inset:0;background:#000d;display:flex;align-items:center;justify-content:center;z-index:9;padding:14px;cursor:zoom-out}
+.lb img{max-width:100%;max-height:100%;border-radius:14px}
 details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
 summary{cursor:pointer;font-weight:700;color:var(--gold);font-size:15px}
 ol,ul{margin:10px 0 0 22px;color:#dde4fb;font-size:14.5px}
@@ -71,15 +75,15 @@ footer{margin-top:34px;text-align:center;color:var(--dim);font-size:12.5px}
 
 <script>
 const T = {
-  bn: {tag:"আন্তরিকতায় গড়া উপকারী অ্যাপ", h1:"আমাদের অ্যাপসমূহ", lead:"নিচের অ্যাপগুলো সরাসরি ডাউনলোড করে আপনার Android ফোনে ইনস্টল করুন। সম্পূর্ণ বিনামূল্যে।", dl:"ডাউনলোড (APK)", ver:"ভার্সন", upd:"হালনাগাদ", size:"আকার", soon:"শীঘ্রই আসছে", how:"কীভাবে ইনস্টল করবেন", new_:"এই ভার্সনে নতুন", sha:"ফাইল যাচাইয়ের SHA-256:", share:"লিংক শেয়ার", copied:"লিংক কপি হয়েছে ✓", need:"Android",
+  bn: {tag:"আন্তরিকতায় গড়া উপকারী অ্যাপ", h1:"আমাদের অ্যাপসমূহ", lead:"নিচের অ্যাপগুলো সরাসরি ডাউনলোড করে আপনার Android ফোনে ইনস্টল করুন। সম্পূর্ণ বিনামূল্যে।", dl:"ডাউনলোড (APK)", ver:"ভার্সন", upd:"হালনাগাদ", size:"আকার", shots:"অ্যাপের স্ক্রিনশট", soon:"শীঘ্রই আসছে", how:"কীভাবে ইনস্টল করবেন", new_:"এই ভার্সনে নতুন", sha:"ফাইল যাচাইয়ের SHA-256:", share:"লিংক শেয়ার", copied:"লিংক কপি হয়েছে ✓", need:"Android",
     steps:["উপরের \"ডাউনলোড\" বাটনে ট্যাপ করুন। ফাইলটি ফোনে নামবে।","ডাউনলোড শেষে ফাইলটি খুলুন। ফোন \"অজানা উৎস থেকে ইনস্টল\" অনুমতি চাইলে \"সেটিংস\" চেপে ব্রাউজারকে অনুমতি দিন।","\"ইনস্টল\" চাপুন। Google-এর সতর্কতা এলে \"তবুও ইনস্টল করুন\" (Install anyway) চাপুন।","অ্যাপ খুলে যে অনুমতি চায় (যেমন নোটিফিকেশন) সেটা দিন।"],
     note:"কেন সতর্কতা আসে? Play Store-এর বাইরে থেকে নামানো যেকোনো অ্যাপে Android এই বার্তা দেখায়। এটা ফোনের সাধারণ নিয়ম।",
     foot:"© 2026 Alfaris Labs · Saleh Ahmed · Bouaké, Côte d'Ivoire"},
-  fr: {tag:"Des applications utiles, avec sincérité", h1:"Nos applications", lead:"Téléchargez et installez directement ces applications sur votre téléphone Android. Entièrement gratuit.", dl:"Télécharger (APK)", ver:"Version", upd:"Mise à jour", size:"Taille", soon:"Bientôt disponible", how:"Comment installer", new_:"Nouveautés", sha:"SHA-256 du fichier :", share:"Partager le lien", copied:"Lien copié ✓", need:"Android",
+  fr: {tag:"Des applications utiles, avec sincérité", h1:"Nos applications", lead:"Téléchargez et installez directement ces applications sur votre téléphone Android. Entièrement gratuit.", dl:"Télécharger (APK)", ver:"Version", upd:"Mise à jour", size:"Taille", shots:"Captures d'écran", soon:"Bientôt disponible", how:"Comment installer", new_:"Nouveautés", sha:"SHA-256 du fichier :", share:"Partager le lien", copied:"Lien copié ✓", need:"Android",
     steps:["Appuyez sur « Télécharger ». Le fichier s'enregistre sur votre téléphone.","Ouvrez le fichier. Si le téléphone demande l'autorisation « sources inconnues », appuyez sur « Paramètres » et autorisez le navigateur.","Appuyez sur « Installer ». Si un avertissement de Google apparaît, choisissez « Installer quand même ».","Ouvrez l'application et accordez les autorisations demandées (par ex. notifications)."],
     note:"Pourquoi cet avertissement ? Android l'affiche pour toute application téléchargée hors du Play Store. C'est une règle générale du téléphone.",
     foot:"© 2026 Alfaris Labs · Saleh Ahmed · Bouaké, Côte d'Ivoire"},
-  en: {tag:"Useful apps, built with sincerity", h1:"Our apps", lead:"Download these apps directly and install them on your Android phone. Completely free.", dl:"Download (APK)", ver:"Version", upd:"Updated", size:"Size", soon:"Coming soon", how:"How to install", new_:"What's new", sha:"File SHA-256 for verification:", share:"Share link", copied:"Link copied ✓", need:"Android",
+  en: {tag:"Useful apps, built with sincerity", h1:"Our apps", lead:"Download these apps directly and install them on your Android phone. Completely free.", dl:"Download (APK)", ver:"Version", upd:"Updated", size:"Size", shots:"Screenshots", soon:"Coming soon", how:"How to install", new_:"What's new", sha:"File SHA-256 for verification:", share:"Share link", copied:"Link copied ✓", need:"Android",
     steps:["Tap \"Download\". The file is saved to your phone.","Open the file. If the phone asks for the \"unknown sources\" permission, tap \"Settings\" and allow your browser.","Tap \"Install\". If a Google warning appears, choose \"Install anyway\".","Open the app and allow the permissions it asks for (e.g. notifications)."],
     note:"Why the warning? Android shows this for any app downloaded outside the Play Store. It is a general phone rule.",
     foot:"© 2026 Alfaris Labs · Saleh Ahmed · Bouaké, Côte d'Ivoire"}
@@ -113,6 +117,13 @@ function render(){
     let meta = "";
     if(a.status==="live") meta = `${t.ver} ${esc(a.version)} · ${esc(a.size)} · ${t.upd} ${esc(a.date)} · ${t.need} ${esc(a.android)}`;
     c.innerHTML = `<div class="top"><div class="ic">${ic}</div><div><h2>${esc(a.name[lang])}</h2><div class="meta">${meta}</div></div></div><p class="desc">${esc(a.tagline[lang])}</p>`;
+    if(a.screens && a.screens.length){
+      const g = el("div","shots"); g.setAttribute("aria-label", t.shots);
+      a.screens.forEach(u=>{const im=el("img"); im.src=u; im.loading="lazy"; im.alt=t.shots;
+        im.onclick=()=>{const lb=el("div","lb"); const big=el("img"); big.src=u; lb.appendChild(big); lb.onclick=()=>lb.remove(); document.body.appendChild(lb)};
+        g.appendChild(im)});
+      c.appendChild(g);
+    }
     if(a.status==="live"){
       const row = el("div","btns");
       const d = el("a","dl","⬇ "+esc(t.dl)); d.href = a.file; d.setAttribute("download", a.id+"-v"+a.version+".apk");
