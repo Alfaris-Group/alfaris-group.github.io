@@ -1,0 +1,40 @@
+{
+  "company": "Alfaris Labs",
+  "owner": "Saleh Ahmed",
+  "apps": [
+    {
+      "id": "noor",
+      "status": "live",
+      "icon": "icons/noor.png",
+      "name": {"bn": "নূর – নামাজের সময়", "fr": "Noor – Heures de prière", "en": "Noor – Prayer Times"},
+      "tagline": {
+        "bn": "নামাজের সময়, আজান, কিবলা, কুরআন, সীরাত, হাদীস ও নামাজ শিক্ষা – সবই এক অ্যাপে, ইন্টারনেট ছাড়াই।",
+        "fr": "Heures de prière, adhan, qibla, Coran, sîra, hadiths et apprentissage de la prière – tout en une seule application, même hors ligne.",
+        "en": "Prayer times, adhan, qibla, Quran, seerah, hadith and learning salah – all in one app, works offline."
+      },
+      "version": "3.5",
+      "date": "2026-11-26",
+      "file": "apps/noor/noor.apk",
+      "size": "2.8 MB",
+      "sha256": "a336b2cdb8f46ca06a44895dfc28396eddbb3fa3275a49f694c012915e659d97",
+      "android": "6.0+",
+      "changes": {
+        "bn": ["সূরার নাম বাংলায় (আন-নিসা, আল-কাহফ…)", "দোয়ার সূত্র ভাষা অনুযায়ী", "Alfaris Labs পরিচিতি পেজ"],
+        "fr": ["Noms des sourates en bengali / latin selon la langue", "Références des invocations localisées", "Page « À propos » d'Alfaris Labs"],
+        "en": ["Surah names in Bengali / Latin by language", "Localised dua references", "Alfaris Labs about page"]
+      }
+    },
+    {
+      "id": "oven",
+      "status": "soon",
+      "icon": "",
+      "emoji": "🧁",
+      "name": {"bn": "Velora ওভেন টাইমার", "fr": "Velora Minuteur de four", "en": "Velora Oven Timer"},
+      "tagline": {
+        "bn": "বেকারির জন্য ওভেন ও বেকিং টাইমার। শীঘ্রই আসছে।",
+        "fr": "Minuteur de four et de cuisson pour boulangeries. Bientôt disponible.",
+        "en": "Oven and baking timer for bakeries. Coming soon."
+      }
+    }
+  ]
+}
