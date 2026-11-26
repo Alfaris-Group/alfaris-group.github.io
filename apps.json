@@ -42,7 +42,11 @@
       "screens": [
         "shots/noor-1.jpg",
         "shots/noor-2.jpg",
-        "shots/noor-3.jpg"
+        "shots/noor-3.jpg",
+        "shots/noor-4.jpg",
+        "shots/noor-5.jpg",
+        "shots/noor-6.jpg",
+        "shots/noor-7.jpg"
       ]
     },
     {
@@ -75,7 +79,13 @@
         "en": [
           "Version 5.0.1"
         ]
-      }
+      },
+      "screens": [
+        "shots/oven-1.jpg",
+        "shots/oven-2.jpg",
+        "shots/oven-3.jpg",
+        "shots/oven-4.jpg"
+      ]
     }
   ]
 }
