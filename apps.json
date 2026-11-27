@@ -79,7 +79,12 @@
         "en": [
           "Version 3.5"
         ]
-      }
+      },
+      "screens": [
+        "shots/oven-1.jpg",
+        "shots/oven-2.jpg",
+        "shots/oven-3.jpg"
+      ]
     }
   ]
 }
