@@ -63,29 +63,23 @@
         "fr": "Minuteur de four et de cuisson pour boulangeries, avec alarme à la fin.",
         "en": "Oven and baking timer for bakeries, with an alarm when time is up."
       },
-      "version": "5.0.1",
-      "date": "2026-11-26",
+      "version": "3.5",
+      "date": "2026-11-27",
       "file": "apps/oven/oven.apk",
-      "size": "169 KB",
-      "sha256": "4042957b3dd6b5cde9c12afea4e62631bf80a95b057d151a769a55671c7cb7f5",
+      "size": "145 KB",
+      "sha256": "7d683d0cf3d8034b234ce952503409d62153d060e3dbd817594609ab1ff645bf",
       "android": "8.0+",
       "changes": {
         "bn": [
-          "সংস্করণ ৫.০.১"
+          "সংস্করণ ৩.৫"
         ],
         "fr": [
-          "Version 5.0.1"
+          "Version 3.5"
         ],
         "en": [
-          "Version 5.0.1"
+          "Version 3.5"
         ]
-      },
-      "screens": [
-        "shots/oven-1.jpg",
-        "shots/oven-2.jpg",
-        "shots/oven-3.jpg",
-        "shots/oven-4.jpg"
-      ]
+      }
     }
   ]
 }
