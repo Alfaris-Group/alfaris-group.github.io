@@ -132,11 +132,11 @@ function fmtDate(d,t){try{return new Date(d+"T00:00:00Z").toLocaleDateString(t.r
 function pick(o,l){return o&&(o[l]||o.en||o.bn)||""}
 
 
-const CNT_NS="alfaris-labs-apps", CNT_BASE="https://abacus.jasoncameron.dev";
+const CNT_BASE="https://alfaris-counter.veloraci.workers.dev";
 const COUNTS = {};
 function fmtNum(n,t){try{return Number(n).toLocaleString(t.reg)}catch(e){return String(n)}}
 function loadCount(id){
-  fetch(CNT_BASE+"/get/"+CNT_NS+"/"+encodeURIComponent(id)).then(r=>r.status===404?{value:0}:(r.ok?r.json():Promise.reject())).then(j=>{
+  fetch(CNT_BASE+"/get/"+encodeURIComponent(id)).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
     if(typeof j.value==="number"){COUNTS[id]=j.value;paintCount(id)}
   }).catch(()=>{});
 }
@@ -150,8 +150,7 @@ function countDownload(id){
     if(Date.now()-last<600000) return;
     localStorage.setItem(k,Date.now());
   }catch(e){}
-  new Image().src=CNT_BASE+"/hit/"+CNT_NS+"/"+encodeURIComponent(id)+"?r="+Math.random();
-  if(COUNTS[id]!=null){COUNTS[id]++;paintCount(id)}
+  fetch(CNT_BASE+"/hit/"+encodeURIComponent(id),{method:"POST",keepalive:true}).then(r=>r.ok?r.json():null).then(j=>{if(j&&typeof j.value==="number"){COUNTS[id]=j.value;paintCount(id)}}).catch(()=>{});
 }
 
 function openLb(screens,i,t){
