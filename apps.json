@@ -85,6 +85,51 @@
         "shots/oven-2.jpg",
         "shots/oven-3.jpg"
       ]
+    },
+    {
+      "id": "sarraf",
+      "status": "live",
+      "type": "web",
+      "icon": "icons/sarraf.png",
+      "url": "sarraf/",
+      "name": {
+        "bn": "Sarraf – স্মার্ট কারেন্সি কনভার্টার",
+        "fr": "Sarraf – Convertisseur de devises",
+        "en": "Sarraf – Smart Currency Converter"
+      },
+      "tagline": {
+        "bn": "টাকা, CFA, ডলার, ইউরোসহ সব কারেন্সির লাইভ রেট। ক্যালকুলেটর, কথায় লেখা, টাকা পাঠানোর তুলনা, চার্ট, রেট অ্যালার্ট ও স্বর্ণের দাম — নেট ছাড়াও চলে।",
+        "fr": "Taux en direct pour taka, CFA, dollar, euro et toutes les devises. Calculatrice, montant en lettres, comparaison de transferts, graphiques, alertes et prix de l'or — fonctionne hors ligne.",
+        "en": "Live rates for taka, CFA, dollar, euro and every currency. Calculator, amount in words, transfer comparison, charts, rate alerts and gold prices — works offline."
+      },
+      "version": "1.0.0",
+      "date": "2026-11-28",
+      "changes": {
+        "bn": [
+          "প্রথম প্রকাশ",
+          "ক্যালকুলেটর কীপ্যাড ও তিন ভাষায় কথায় লেখা",
+          "টাকা পাঠানোর সার্ভিস তুলনা",
+          "চার্ট, রেট অ্যালার্ট, স্বর্ণ-রুপার দাম"
+        ],
+        "fr": [
+          "Première version",
+          "Calculatrice et montant en lettres en 3 langues",
+          "Comparaison des services de transfert",
+          "Graphiques, alertes, prix de l'or et de l'argent"
+        ],
+        "en": [
+          "First release",
+          "Calculator keypad and amount in words in 3 languages",
+          "Money transfer service comparison",
+          "Charts, rate alerts, gold & silver prices"
+        ]
+      },
+      "screens": [
+        "shots/sarraf-1.jpg",
+        "shots/sarraf-2.jpg",
+        "shots/sarraf-3.jpg",
+        "shots/sarraf-4.jpg"
+      ]
     }
   ]
 }

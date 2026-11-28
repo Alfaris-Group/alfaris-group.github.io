@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Sarraf – Smart Currency Converter</title>
+<meta name="description" content="Sarraf by Alfaris Labs — smart currency converter: BDT, CFA, USD, EUR and more. Works offline.">
+<meta name="theme-color" content="#0B0C0F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#0B0C0F; --card:#17191E; --card2:#1F2228; --line:#2A2E36; --text:#F3F4F6; --muted:#9097A3; --dim:#646B77;
+  --gold:#E9B44C; --gold2:#C98F2E; --gold-soft:rgba(233,180,76,.14); --green:#34C27A; --red:#F0606A; --blue:#5B8CFF;
+  --shadow:0 10px 30px rgba(0,0,0,.35); --r:22px;
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+}
+html[data-theme="light"]{
+  --bg:#F4F2EE; --card:#FFFFFF; --card2:#F1EEE8; --line:#E3DED5; --text:#17181B; --muted:#6B6F78; --dim:#9A9EA6;
+  --gold:#B97F14; --gold2:#9A6608; --gold-soft:rgba(185,127,20,.12); --shadow:0 8px 24px rgba(40,30,10,.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali","Hind Siliguri",sans-serif;overscroll-behavior-y:none}
+body{min-height:100vh;padding-top:var(--safe-t)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+input,select{font:inherit;color:var(--text)}
+.app{max-width:560px;margin:0 auto;padding:0 16px calc(110px + var(--safe-b));}
+/* header */
+.top{display:flex;align-items:center;gap:12px;padding:14px 2px 10px;position:sticky;top:0;background:linear-gradient(var(--bg) 75%,transparent);z-index:20}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.brand img{width:38px;height:38px;border-radius:11px}
+.brand b{font-size:20px;letter-spacing:.3px;display:block;line-height:1.1}
+.brand small{color:var(--muted);font-size:11.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:42px;height:42px;border-radius:50%;background:var(--card);display:grid;place-items:center;flex:none}
+.icon-btn svg{width:20px;height:20px}
+.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* views */
+.view{display:none;animation:fade .25s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-size:22px;margin:8px 4px 14px}
+.card{background:var(--card);border-radius:var(--r);padding:16px 18px}
+.muted{color:var(--muted)} .small{font-size:13px}
+/* rows */
+.rows{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.row{background:var(--card);border-radius:var(--r);padding:16px 18px;display:flex;align-items:center;gap:12px;position:relative;transition:box-shadow .2s, background .2s;min-height:96px}
+.row.base{box-shadow:inset 0 0 0 1.5px var(--gold);background:linear-gradient(135deg,var(--card),var(--card2))}
+.row .lbl{position:absolute;top:10px;left:18px;font-size:12px;color:var(--muted)}
+.row.base .lbl{color:var(--gold)}
+.cur{display:flex;align-items:center;gap:10px;flex:none;padding:14px 0 0}
+.flag{width:38px;height:38px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:26px;overflow:hidden;flex:none;line-height:1}
+.flag.txt{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.2px}
+.code{font-size:21px;font-weight:650;display:flex;align-items:center;gap:4px}
+.code svg{width:16px;height:16px;opacity:.7}
+.amt{flex:1;text-align:right;min-width:0;padding-top:14px}
+.amt .v{font-size:28px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.amt .v.long{font-size:22px}
+.amt .r{font-size:12.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.amt .eq{font-size:14px;color:var(--gold);margin-top:2px}
+.caret{display:inline-block;width:2px;height:26px;background:var(--gold);vertical-align:-4px;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.edit-tools{display:none;gap:6px;flex:none}
+.editing .edit-tools{display:flex}
+.editing .amt{display:none}
+.tool{width:36px;height:36px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:16px}
+.tool.del{color:var(--red)}
+.list-actions{display:flex;justify-content:center;gap:10px;margin:16px 0 6px;flex-wrap:wrap}
+.pill{padding:10px 16px;border-radius:999px;background:var(--card);font-size:14.5px;display:inline-flex;align-items:center;gap:6px}
+.pill.gold{background:var(--gold-soft);color:var(--gold)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:999px;background:var(--card);font-size:14px;border:1px solid var(--line)}
+.chip.on{background:var(--gold);color:#1a1205;border-color:var(--gold);font-weight:600}
+.status{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin:14px 4px 4px;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+.dot.off{background:var(--red)} .dot.old{background:var(--gold)}
+.status .sp{flex:1}
+.words{margin-top:14px}
+.words summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:600}
+.words summary::-webkit-details-marker{display:none}
+.wline{padding:10px 0;border-top:1px solid var(--line);font-size:14.5px;line-height:1.5}
+.wline:first-of-type{margin-top:10px}
+.wline b{color:var(--gold);font-size:12px;display:block;letter-spacing:.4px}
+.peg{font-size:12px;color:var(--dim);margin:10px 4px 0;text-align:center}
+/* keypad */
+.keypad{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--card);border-radius:26px 26px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.4);padding:10px 12px calc(12px + var(--safe-b));transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-width:560px;margin:0 auto}
+.keypad.on{transform:none}
+.kp-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.kp-top .chips{flex:1}
+.grip{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 8px}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.key{height:56px;border-radius:16px;background:var(--card2);font-size:23px;font-weight:550;display:grid;place-items:center;user-select:none;transition:transform .06s,background .15s}
+.key:active{transform:scale(.95);background:var(--line)}
+.key.op{color:var(--gold);font-size:26px}
+.key.fn{color:var(--muted);font-size:19px}
+.key.ok{background:var(--gold);color:#1a1205;font-size:24px}
+.key svg{width:24px;height:24px}
+/* bottom nav */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + var(--safe-b));z-index:30;display:flex;gap:6px;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:6px;border-radius:999px;box-shadow:var(--shadow);border:1px solid var(--line);width:min(calc(100% - 24px),536px)}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:999px;font-size:11.5px;color:var(--muted)}
+.nav button svg{width:22px;height:22px}
+.nav button.on{background:var(--card2);color:var(--text)}
+.nav button.on svg{color:var(--gold)}
+/* modal sheet */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+.sheet-bg.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--bg);border-radius:26px 26px 0 0;max-height:88vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-width:560px;margin:0 auto;padding-bottom:var(--safe-b)}
+.sheet.on{transform:none}
+.sheet-h{padding:12px 18px 8px;display:flex;align-items:center;gap:10px}
+.sheet-h h3{margin:0;font-size:18px;flex:1}
+.sheet-b{overflow:auto;padding:4px 16px 20px}
+.search{width:100%;padding:13px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);outline:none;font-size:16px}
+.search:focus{border-color:var(--gold)}
+.sec-t{font-size:12.5px;color:var(--muted);margin:16px 4px 6px;text-transform:uppercase;letter-spacing:.6px}
+.citem{display:flex;align-items:center;gap:12px;padding:10px 6px;border-radius:14px;width:100%;text-align:left}
+.citem:active{background:var(--card)}
+.citem .n{flex:1;min-width:0}
+.citem .n b{display:block;font-size:16px}
+.citem .n span{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.citem .chk{color:var(--gold);font-size:18px}
+/* forms */
+.field{margin:12px 0}
+.field label{display:block;font-size:13px;color:var(--muted);margin:0 4px 6px}
+.inp{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);outline:none;font-size:16px}
+.inp:focus{border-color:var(--gold)}
+.seg{display:flex;background:var(--card);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;padding:10px 6px;border-radius:11px;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--card2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.btn{width:100%;padding:14px;border-radius:16px;background:var(--gold);color:#1a1205;font-weight:650;font-size:16px;margin-top:8px}
+.btn.ghost{background:var(--card);color:var(--text)}
+.btn.danger{background:transparent;color:var(--red);border:1px solid var(--line)}
+.curbtn{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:14px;padding:10px 12px;font-weight:600;font-size:17px;flex:1}
+.pair{display:flex;align-items:center;gap:10px}
+.pair .flag{width:30px;height:30px;font-size:20px}
+.pair .flag.txt{font-size:9px}
+.swap{width:44px;height:44px;border-radius:50%;background:var(--gold-soft);color:var(--gold);display:grid;place-items:center;flex:none}
+.swap svg{width:20px;height:20px}
+/* chart */
+.bigrate{font-size:34px;font-weight:700;margin:14px 2px 2px;font-variant-numeric:tabular-nums}
+.chg{font-size:14px;font-weight:600}
+.chg.up{color:var(--green)} .chg.dn{color:var(--red)}
+.chart-box{position:relative;margin-top:14px;height:220px}
+.chart-box svg{width:100%;height:100%;display:block;touch-action:none}
+.tip{position:absolute;top:0;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:12px;pointer-events:none;white-space:nowrap;transform:translateX(-50%);display:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.stat{background:var(--card);border-radius:16px;padding:12px}
+.stat span{display:block;font-size:12px;color:var(--muted)}
+.stat b{display:block;font-size:15px;margin-top:3px;font-variant-numeric:tabular-nums}
+.ranges{margin-top:16px}
+.center-msg{display:grid;place-items:center;height:100%;color:var(--muted);font-size:14px;text-align:center;padding:20px}
+/* remit */
+.res{margin-top:12px;background:var(--card);border-radius:20px;padding:15px 16px;position:relative}
+.res.best{box-shadow:inset 0 0 0 1.5px var(--green)}
+.res .hd{display:flex;align-items:center;gap:8px}
+.res .hd b{flex:1;font-size:16px}
+.badge{font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(52,194,122,.15);color:var(--green);font-weight:600}
+.badge.ex{background:var(--gold-soft);color:var(--gold)}
+.res .big{font-size:26px;font-weight:700;margin:8px 0 4px;font-variant-numeric:tabular-nums}
+.res .meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted)}
+.res .loss{color:var(--red)}
+.res .acts{display:flex;gap:6px}
+.res .acts button{width:32px;height:32px;border-radius:50%;background:var(--card2);display:grid;place-items:center}
+.res .acts svg{width:15px;height:15px}
+.bigin{font-size:28px;font-weight:700;text-align:right;padding:12px 14px}
+.tipbox{margin-top:14px;font-size:13px;color:var(--muted);background:var(--card);border-radius:16px;padding:12px 14px;line-height:1.55}
+/* more */
+.menu{display:flex;flex-direction:column;gap:10px}
+.mitem{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:20px;padding:15px 16px;text-align:left;width:100%}
+.mitem .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold);flex:none}
+.mitem .ic svg{width:22px;height:22px}
+.mitem .t{flex:1}
+.mitem .t b{display:block;font-size:16px}
+.mitem .t span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.mitem .ar{color:var(--dim)}
+.sub{display:none}
+.sub.on{display:block;animation:fade .2s ease}
+.backrow{display:flex;align-items:center;gap:10px;margin:6px 0 12px}
+.backrow h2{margin:0;font-size:20px}
+.gtable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.gtable th,.gtable td{padding:11px 6px;text-align:right;border-bottom:1px solid var(--line);font-size:14px}
+.gtable th{color:var(--muted);font-weight:500;font-size:12px}
+.gtable td:first-child,.gtable th:first-child{text-align:left}
+.gtable td:first-child{font-weight:600;color:var(--gold)}
+.aitem,.hitem{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:13px 14px;margin-bottom:10px}
+.aitem .n,.hitem .n{flex:1;min-width:0}
+.aitem .n b,.hitem .n b{display:block;font-size:15px}
+.aitem .n span,.hitem .n span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.switch{width:46px;height:28px;border-radius:999px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.switch.on{background:var(--gold)}
+.switch.on::after{transform:translateX(18px)}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 2px;border-bottom:1px solid var(--line)}
+.setrow:last-child{border-bottom:0}
+.setrow > span{font-size:15px}
+.setrow select{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;max-width:58%}
+.about-hero{text-align:center;padding:10px 0 6px}
+.about-hero img{width:96px;height:96px;border-radius:26px;box-shadow:var(--shadow)}
+.about-hero h3{margin:14px 0 2px;font-size:24px}
+.empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-b));transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:14px;z-index:90;opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.banner{background:var(--gold-soft);color:var(--gold);border-radius:16px;padding:12px 14px;font-size:13.5px;margin:4px 0 12px;display:flex;gap:10px;align-items:center}
+.banner button{margin-left:auto;font-weight:700}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <img src="icon-192.png" alt="">
+      <div style="min-width:0"><b>Sarraf</b><small data-t="appSub"></small></div>
+    </div>
+    <button class="icon-btn" id="btnShare" aria-label="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+    <button class="icon-btn" id="btnRefresh" aria-label="refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+  </header>
+
+  <div id="installBanner" class="banner" style="display:none"><span data-t="installHint"></span><button id="btnInstallBanner" data-t="install"></button></div>
+  <div id="alertBanner" class="banner" style="display:none"></div>
+
+  <!-- CONVERT -->
+  <section class="view on" id="v-convert">
+    <div class="rows" id="rows"></div>
+    <div class="list-actions">
+      <button class="pill gold" id="btnAdd"><span data-t="addCurrency"></span></button>
+      <button class="pill" id="btnArrange"><span data-t="arrange"></span></button>
+      <button class="pill" id="btnSave">★ <span data-t="save"></span></button>
+    </div>
+    <div class="chips" id="quickChips"></div>
+    <div class="status" id="status"></div>
+    <details class="card words" id="wordsCard" open>
+      <summary><span data-t="inWords"></span><span class="muted">▾</span></summary>
+      <div id="wordsBody"></div>
+    </details>
+    <div class="peg" data-t="pegNote"></div>
+  </section>
+
+  <!-- CHART -->
+  <section class="view" id="v-chart">
+    <h2 data-t="chartTitle"></h2>
+    <div class="pair">
+      <button class="curbtn" id="chFrom"></button>
+      <button class="swap" id="chSwap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></button>
+      <button class="curbtn" id="chTo"></button>
+    </div>
+    <div class="bigrate" id="chRate">–</div>
+    <div class="chg" id="chChg">&nbsp;</div>
+    <div class="seg ranges" id="chRanges"></div>
+    <div class="card" style="margin-top:14px;padding:12px 10px">
+      <div class="chart-box" id="chartBox"><div class="center-msg" data-t="loading"></div></div>
+    </div>
+    <div class="stats" id="chStats"></div>
+  </section>
+
+  <!-- REMIT -->
+  <section class="view" id="v-remit">
+    <h2 data-t="remitTitle"></h2>
+    <div class="pair">
+      <button class="curbtn" id="rmFrom"></button>
+      <button class="swap" id="rmSwap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></button>
+      <button class="curbtn" id="rmTo"></button>
+    </div>
+    <div class="seg" id="rmMode" style="margin-top:12px">
+      <button data-m="send" data-t="modeSend"></button>
+      <button data-m="recv" data-t="modeRecv"></button>
+    </div>
+    <div class="field">
+      <label id="rmAmtLbl"></label>
+      <input class="inp bigin" id="rmAmt" inputmode="decimal" autocomplete="off">
+    </div>
+    <div class="chips" id="rmChips"></div>
+    <div id="rmResults"></div>
+    <button class="btn ghost" id="btnAddProv" style="margin-top:14px">+ <span data-t="addProvider"></span></button>
+    <div class="tipbox" data-t="remitTip"></div>
+  </section>
+
+  <!-- MORE -->
+  <section class="view" id="v-more">
+    <div class="sub on" id="s-menu">
+      <h2 data-t="navMore"></h2>
+      <div class="menu">
+        <button class="mitem" data-sub="gold"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 18h8l-1.5-5h-5zM13 18h8l-1.5-5h-5zM8 11h8l-1.5-5h-5z"/></svg></div><div class="t"><b data-t="gold"></b><span data-t="goldSub"></span></div><span class="ar">›</span></button>
+        <button class="mitem" data-sub="alerts"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div><div class="t"><b data-t="alerts"></b><span data-t="alertsSub"></span></div><span class="ar">›</span></button>
+        <button class="mitem" data-sub="history"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></div><div class="t"><b data-t="history"></b><span data-t="historySub"></span></div><span class="ar">›</span></button>
+        <button class="mitem" data-sub="settings"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></div><div class="t"><b data-t="settings"></b><span data-t="settingsSub"></span></div><span class="ar">›</span></button>
+        <button class="mitem" data-sub="about"><div class="ic"><img src="icon-192.png" style="width:30px;height:30px;border-radius:8px" alt=""></div><div class="t"><b data-t="about"></b><span>Alfaris Labs</span></div><span class="ar">›</span></button>
+        <button class="mitem" id="btnInstall" style="display:none"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div><div class="t"><b data-t="install"></b><span data-t="installHint"></span></div><span class="ar">›</span></button>
+      </div>
+    </div>
+
+    <div class="sub" id="s-gold">
+      <div class="backrow"><button class="icon-btn back">‹</button><h2 data-t="gold"></h2></div>
+      <div class="seg" id="goldCur"></div>
+      <div class="card" style="margin-top:12px" id="goldBody"><div class="empty" data-t="loading"></div></div>
+      <div class="tipbox" data-t="goldNote"></div>
+    </div>
+
+    <div class="sub" id="s-alerts">
+      <div class="backrow"><button class="icon-btn back">‹</button><h2 data-t="alerts"></h2></div>
+      <button class="btn ghost" id="btnNotif" style="margin:0 0 12px"></button>
+      <div id="alertList"></div>
+      <button class="btn" id="btnAddAlert">+ <span data-t="addAlert"></span></button>
+      <div class="tipbox" data-t="alertNote"></div>
+    </div>
+
+    <div class="sub" id="s-history">
+      <div class="backrow"><button class="icon-btn back">‹</button><h2 data-t="history"></h2></div>
+      <div id="histList"></div>
+      <button class="btn danger" id="btnClearHist" data-t="clearAll"></button>
+    </div>
+
+    <div class="sub" id="s-settings">
+      <div class="backrow"><button class="icon-btn back">‹</button><h2 data-t="settings"></h2></div>
+      <div class="card">
+        <div class="setrow"><span data-t="language"></span><select id="setLang"><option value="bn">বাংলা</option><option value="fr">Français</option><option value="en">English</option></select></div>
+        <div class="setrow"><span data-t="theme"></span><select id="setTheme"></select></div>
+        <div class="setrow"><span data-t="numStyle"></span><select id="setNum"></select></div>
+        <div class="setrow"><span data-t="wordsToggle"></span><button class="switch" id="setWords"></button></div>
+        <div class="setrow"><span data-t="autoRefresh"></span><button class="switch" id="setAuto"></button></div>
+      </div>
+      <button class="btn danger" id="btnReset" style="margin-top:16px" data-t="reset"></button>
+    </div>
+
+    <div class="sub" id="s-about">
+      <div class="backrow"><button class="icon-btn back">‹</button><h2 data-t="about"></h2></div>
+      <div class="about-hero">
+        <img src="icon-512.png" alt="Sarraf">
+        <h3>Sarraf</h3>
+        <div class="muted" data-t="appSub"></div>
+        <div class="muted small" style="margin-top:4px" id="verLine"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="setrow"><span data-t="company"></span><b>Alfaris Labs</b></div>
+        <div class="setrow"><span data-t="devBy"></span><b style="text-align:right">Saleh Ahmed<br><span class="muted small" style="font-weight:400">সালেহ আহমেদ · Bouaké, Côte d'Ivoire</span></b></div>
+        <div class="setrow"><span data-t="dataSrc"></span><span class="muted small" style="text-align:right">open.er-api.com<br>fawazahmed0 currency-api</span></div>
+      </div>
+      <div class="tipbox" data-t="aboutText"></div>
+      <p class="peg" style="margin-top:18px">© 2026 Alfaris Labs · Developed by Saleh Ahmed</p>
+    </div>
+  </section>
+</div>
+
+<!-- keypad -->
+<div class="keypad" id="keypad">
+  <div class="grip"></div>
+  <div class="kp-top"><div class="chips" id="kpChips"></div></div>
+  <div class="keys" id="keys"></div>
+</div>
+
+<nav class="nav" id="nav">
+  <button data-v="convert" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg><span data-t="navConvert"></span></button>
+  <button data-v="chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg><span data-t="navChart"></span></button>
+  <button data-v="remit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg><span data-t="navRemit"></span></button>
+  <button data-v="more"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span data-t="navMore"></span></button>
+</nav>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet"><div class="grip" style="margin-top:10px"></div><div class="sheet-h"><h3 id="sheetTitle"></h3><button class="icon-btn" id="sheetClose">✕</button></div><div class="sheet-b" id="sheetBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const VERSION = "1.0.0";
+const PEG_XOF = 655.957; // 1 EUR = 655.957 XOF/XAF (fixed)
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ================= I18N ================= */
+const T = {
+bn:{appSub:"স্মার্ট কারেন্সি কনভার্টার · Alfaris Labs",navConvert:"কনভার্ট",navChart:"চার্ট",navRemit:"টাকা পাঠান",navMore:"আরও",
+youConvert:"আপনি কনভার্ট করছেন",addCurrency:"+ কারেন্সি যোগ",arrange:"সাজান",done:"হয়েছে",save:"সেভ",
+lastUpdated:"সর্বশেষ আপডেট",midMarket:"মিড-মার্কেট রেট",offline:"অফলাইন · সেভ করা রেট",builtin:"বিল্ট-ইন রেট · নেট চালু করে রিফ্রেশ দিন",
+updating:"আপডেট হচ্ছে…",updatedOk:"রেট আপডেট হয়েছে ✓",updateFail:"নতুন রেট আনা যায়নি, সেভ করা রেট দেখাচ্ছে",inWords:"কথায়",
+search:"নাম বা কোড লিখে খুঁজুন",popular:"জনপ্রিয়",allCur:"সব কারেন্সি",chooseCur:"কারেন্সি বাছুন",
+share:"শেয়ার করুন",shareText:"লেখা হিসেবে শেয়ার",shareImage:"ছবি হিসেবে শেয়ার (কার্ড)",copy:"কপি করুন",copied:"কপি হয়েছে ✓",savedHist:"হিস্ট্রিতে সেভ হয়েছে ✓",
+pegNote:"CFA ফ্রাঁ ইউরোর সাথে স্থির: ১ EUR = ৬৫৫.৯৫৭ XOF — নেট ছাড়াও এই হিসাব সবসময় সঠিক",
+chartTitle:"রেটের ওঠানামা",high:"সর্বোচ্চ",low:"সর্বনিম্ন",avg:"গড়",loading:"লোড হচ্ছে…",chartErr:"চার্টের ডাটা আনা যায়নি — ইন্টারনেট দরকার",
+r7:"৭ দিন",r30:"১ মাস",r90:"৩ মাস",r365:"১ বছর",
+remitTitle:"টাকা পাঠানোর হিসাব",modeSend:"আমি পাঠাব",modeRecv:"দেশে পৌঁছাবে",youSend:"আপনি কত পাঠাবেন",theyGet:"প্রাপক কত পাবেন",
+recvGets:"প্রাপক পাবেন",youNeed:"আপনাকে পাঠাতে হবে",addProvider:"সার্ভিস/ব্যাংক যোগ করুন",effRate:"কার্যকর রেট",fee:"ফি",
+loss:"মিড-মার্কেটের চেয়ে কম",extra:"মিড-মার্কেটের চেয়ে বেশি লাগবে",best:"সেরা",midRef:"মিড-মার্কেট (ফি ছাড়া, আদর্শ হিসাব)",
+provName:"নাম (যেমন: Western Union, bKash)",provType:"রেটের ধরন",typeRate:"তারা যে রেট দেয়",typeMargin:"রেট থেকে কত % কম",
+rateFor:"রেট: ১ {a} = ? {b}",marginPct:"কত % কম দেয়",feeLbl:"ফি ({c} তে)",cancel:"বাতিল",del:"মুছুন",editProv:"সার্ভিস এডিট",
+example:"উদাহরণ",remitTip:"💡 যেকোনো সার্ভিস (Western Union, MoneyGram, Wave, ব্যাংক, bKash) যে রেট আর ফি নেয় সেটা বসান — Sarraf দেখাবে কোনটায় দেশে সবচেয়ে বেশি টাকা পৌঁছায়। উদাহরণের সংখ্যাগুলো আসল নয়, নিজের রেট দিয়ে বদলে নিন।",
+gold:"স্বর্ণ ও রুপার দাম",goldSub:"ভরি ও গ্রাম হিসেবে, টাকা ও CFA তে",alerts:"রেট অ্যালার্ট",alertsSub:"রেট লক্ষ্যে পৌঁছালে নোটিফিকেশন",
+history:"হিস্ট্রি",historySub:"আগের কনভার্শনগুলো",settings:"সেটিংস",settingsSub:"ভাষা, থিম, সংখ্যার ধরন",about:"অ্যাপ সম্পর্কে",
+install:"অ্যাপ ইনস্টল করুন",installHint:"ফোনের হোম স্ক্রিনে অ্যাপ হিসেবে বসান",
+perVori:"প্রতি ভরি",perGram:"প্রতি গ্রাম",silver:"রুপা",goldNote:"আন্তর্জাতিক বাজারদর থেকে হিসাব (১ ভরি = ১১.৬৬৪ গ্রাম)। দোকানের দামে মজুরি, ভ্যাট ও স্থানীয় পার্থক্য আলাদা যোগ হয়।",goldErr:"দাম আনা যায়নি — ইন্টারনেট দরকার",
+addAlert:"অ্যালার্ট যোগ করুন",above:"এর উপরে গেলে",below:"এর নিচে নামলে",current:"বর্তমান",target:"লক্ষ্য রেট",when:"কখন জানাবে",
+notifOn:"🔔 নোটিফিকেশন চালু আছে",notifEnable:"🔔 নোটিফিকেশন চালু করুন",notifDenied:"নোটিফিকেশন বন্ধ — ফোনের সেটিংস থেকে চালু করুন",noAlerts:"কোনো অ্যালার্ট নেই",
+alertHit:"রেট অ্যালার্ট",alertNote:"অ্যাপ খুললে এবং রিফ্রেশ হলে অ্যালার্ট চেক হয়। অ্যাপ ইনস্টল করা থাকলে ফোন মাঝে মাঝে ব্যাকগ্রাউন্ডেও চেক করে। অ্যালার্ট একবার বাজলে বন্ধ হয়ে যায়, আবার চালু করতে পারবেন।",
+noHist:"এখনো কিছু সেভ হয়নি। কনভার্ট করে ✓ বা ★ চাপুন।",clearAll:"সব মুছুন",confirmClear:"সব হিস্ট্রি মুছে ফেলবেন?",
+language:"ভাষা",theme:"থিম",dark:"ডার্ক",light:"লাইট",auto:"ফোনের মতো",numStyle:"সংখ্যার ধরন",nsIntl:"1,234,567.89",nsLakh:"12,34,567.89 (লাখ)",nsBn:"১২,৩৪,৫৬৭.৮৯ (বাংলা)",nsFr:"1 234 567,89",
+wordsToggle:"কথায় দেখাও",autoRefresh:"অ্যাপ খুললে রেট আপডেট",reset:"সব ডাটা রিসেট",confirmReset:"সব সেটিংস, হিস্ট্রি ও অ্যালার্ট মুছে যাবে। নিশ্চিত?",
+company:"কোম্পানি",devBy:"ডেভেলপ করেছেন",dataSrc:"রেটের উৎস",version:"ভার্সন",
+aboutText:"Sarraf (সররাফ) — আরবিতে ‘মুদ্রা বিনিময়কারী’। বাংলাদেশ ও আইভরি কোস্টের মানুষের জন্য বানানো স্মার্ট কনভার্টার: লাইভ রেট, অফলাইন হিসাব, ক্যালকুলেটর, টাকা পাঠানোর তুলনা, চার্ট, অ্যালার্ট আর স্বর্ণের দাম — এক অ্যাপে।",
+fresh:"আপডেটেড",hoursAgo:"{n} ঘণ্টা আগে",minsAgo:"{n} মিনিট আগে",daysAgo:"{n} দিন আগে",justNow:"এইমাত্র",
+alertSet:"অ্যালার্ট সেট হয়েছে ✓",invalid:"সঠিক সংখ্যা দিন",installed:"ইনস্টল হয়েছে ✓",andW:"",pointW:"দশমিক"},
+fr:{appSub:"Convertisseur intelligent · Alfaris Labs",navConvert:"Convertir",navChart:"Graphique",navRemit:"Envoyer",navMore:"Plus",
+youConvert:"Vous convertissez",addCurrency:"+ Ajouter",arrange:"Organiser",done:"Terminé",save:"Garder",
+lastUpdated:"Mis à jour",midMarket:"Taux moyen du marché",offline:"Hors ligne · taux enregistrés",builtin:"Taux intégrés · connectez-vous et actualisez",
+updating:"Mise à jour…",updatedOk:"Taux mis à jour ✓",updateFail:"Échec de mise à jour, taux enregistrés affichés",inWords:"En lettres",
+search:"Rechercher nom ou code",popular:"Populaires",allCur:"Toutes les devises",chooseCur:"Choisir une devise",
+share:"Partager",shareText:"Partager en texte",shareImage:"Partager en image (carte)",copy:"Copier",copied:"Copié ✓",savedHist:"Ajouté à l'historique ✓",
+pegNote:"Le franc CFA est fixe à l'euro : 1 EUR = 655,957 XOF — toujours exact, même hors ligne",
+chartTitle:"Évolution du taux",high:"Plus haut",low:"Plus bas",avg:"Moyenne",loading:"Chargement…",chartErr:"Données indisponibles — connexion requise",
+r7:"7 j",r30:"1 mois",r90:"3 mois",r365:"1 an",
+remitTitle:"Calcul de transfert",modeSend:"J'envoie",modeRecv:"Doit arriver",youSend:"Montant envoyé",theyGet:"Montant à recevoir",
+recvGets:"Le bénéficiaire reçoit",youNeed:"Vous devez envoyer",addProvider:"Ajouter un service / banque",effRate:"Taux effectif",fee:"Frais",
+loss:"de moins que le taux moyen",extra:"de plus que le taux moyen",best:"Meilleur",midRef:"Taux moyen (sans frais, référence)",
+provName:"Nom (ex : Western Union, Wave)",provType:"Type de taux",typeRate:"Taux proposé",typeMargin:"% sous le taux moyen",
+rateFor:"Taux : 1 {a} = ? {b}",marginPct:"% en moins",feeLbl:"Frais (en {c})",cancel:"Annuler",del:"Supprimer",editProv:"Modifier le service",
+example:"Exemple",remitTip:"💡 Saisissez le taux et les frais de chaque service (Western Union, MoneyGram, Wave, banque…) — Sarraf montre lequel fait arriver le plus d'argent. Les exemples sont fictifs, remplacez-les par vos taux réels.",
+gold:"Prix de l'or et de l'argent",goldSub:"Par vori et par gramme, en taka et CFA",alerts:"Alertes de taux",alertsSub:"Notification quand le taux atteint votre cible",
+history:"Historique",historySub:"Conversions précédentes",settings:"Paramètres",settingsSub:"Langue, thème, format des nombres",about:"À propos",
+install:"Installer l'application",installHint:"Ajouter à l'écran d'accueil comme une appli",
+perVori:"Par vori",perGram:"Par gramme",silver:"Argent",goldNote:"Calculé à partir du cours international (1 vori = 11,664 g). Le prix en boutique ajoute façon, TVA et écarts locaux.",goldErr:"Prix indisponible — connexion requise",
+addAlert:"Ajouter une alerte",above:"Au-dessus de",below:"En dessous de",current:"Actuel",target:"Taux cible",when:"Condition",
+notifOn:"🔔 Notifications activées",notifEnable:"🔔 Activer les notifications",notifDenied:"Notifications bloquées — activez-les dans les réglages",noAlerts:"Aucune alerte",
+alertHit:"Alerte de taux",alertNote:"Les alertes sont vérifiées à l'ouverture et à chaque actualisation. Si l'appli est installée, le téléphone vérifie aussi parfois en arrière-plan. Une alerte se désactive après avoir sonné.",
+noHist:"Rien d'enregistré. Convertissez puis appuyez sur ✓ ou ★.",clearAll:"Tout effacer",confirmClear:"Effacer tout l'historique ?",
+language:"Langue",theme:"Thème",dark:"Sombre",light:"Clair",auto:"Comme le téléphone",numStyle:"Format des nombres",nsIntl:"1,234,567.89",nsLakh:"12,34,567.89 (lakh)",nsBn:"১২,৩৪,৫৬৭.৮৯ (bengali)",nsFr:"1 234 567,89",
+wordsToggle:"Afficher en lettres",autoRefresh:"Actualiser à l'ouverture",reset:"Réinitialiser les données",confirmReset:"Paramètres, historique et alertes seront effacés. Continuer ?",
+company:"Entreprise",devBy:"Développé par",dataSrc:"Source des taux",version:"Version",
+aboutText:"Sarraf — « changeur de monnaie » en arabe. Un convertisseur intelligent pour le Bangladesh et la Côte d'Ivoire : taux en direct, hors ligne, calculatrice, comparaison de transferts, graphiques, alertes et prix de l'or.",
+fresh:"À jour",hoursAgo:"il y a {n} h",minsAgo:"il y a {n} min",daysAgo:"il y a {n} j",justNow:"à l'instant",
+alertSet:"Alerte créée ✓",invalid:"Entrez un nombre valide",installed:"Installée ✓",andW:"et",pointW:"virgule"},
+en:{appSub:"Smart Currency Converter · Alfaris Labs",navConvert:"Convert",navChart:"Chart",navRemit:"Send",navMore:"More",
+youConvert:"You convert",addCurrency:"+ Add currency",arrange:"Arrange",done:"Done",save:"Save",
+lastUpdated:"Last updated",midMarket:"Mid-market rate",offline:"Offline · saved rates",builtin:"Built-in rates · go online and refresh",
+updating:"Updating…",updatedOk:"Rates updated ✓",updateFail:"Couldn't update, showing saved rates",inWords:"In words",
+search:"Search name or code",popular:"Popular",allCur:"All currencies",chooseCur:"Choose currency",
+share:"Share",shareText:"Share as text",shareImage:"Share as image (card)",copy:"Copy",copied:"Copied ✓",savedHist:"Saved to history ✓",
+pegNote:"CFA franc is fixed to the euro: 1 EUR = 655.957 XOF — always exact, even offline",
+chartTitle:"Rate history",high:"High",low:"Low",avg:"Average",loading:"Loading…",chartErr:"Couldn't load chart data — internet needed",
+r7:"7D",r30:"1M",r90:"3M",r365:"1Y",
+remitTitle:"Money transfer calculator",modeSend:"I send",modeRecv:"They receive",youSend:"Amount you send",theyGet:"Amount to arrive",
+recvGets:"Recipient gets",youNeed:"You need to send",addProvider:"Add service / bank",effRate:"Effective rate",fee:"Fee",
+loss:"less than mid-market",extra:"more than mid-market",best:"Best",midRef:"Mid-market (no fees, reference)",
+provName:"Name (e.g. Western Union, bKash)",provType:"Rate type",typeRate:"Rate they give",typeMargin:"% below mid-market",
+rateFor:"Rate: 1 {a} = ? {b}",marginPct:"% below",feeLbl:"Fee (in {c})",cancel:"Cancel",del:"Delete",editProv:"Edit service",
+example:"Example",remitTip:"💡 Enter the rate and fee each service gives you (Western Union, MoneyGram, Wave, bank, bKash) — Sarraf shows which one delivers the most money. Example numbers are not real; replace them with your own.",
+gold:"Gold & silver price",goldSub:"Per vori and gram, in taka and CFA",alerts:"Rate alerts",alertsSub:"Get notified when a rate hits your target",
+history:"History",historySub:"Previous conversions",settings:"Settings",settingsSub:"Language, theme, number format",about:"About",
+install:"Install app",installHint:"Add to your home screen as an app",
+perVori:"Per vori",perGram:"Per gram",silver:"Silver",goldNote:"Calculated from the international spot price (1 vori = 11.664 g). Shop prices add making charge, VAT and local differences.",goldErr:"Couldn't load prices — internet needed",
+addAlert:"Add alert",above:"Goes above",below:"Drops below",current:"Current",target:"Target rate",when:"Condition",
+notifOn:"🔔 Notifications on",notifEnable:"🔔 Turn on notifications",notifDenied:"Notifications blocked — enable them in phone settings",noAlerts:"No alerts yet",
+alertHit:"Rate alert",alertNote:"Alerts are checked when the app opens and on each refresh. If installed, the phone may also check in the background. An alert turns off after it fires; you can switch it back on.",
+noHist:"Nothing saved yet. Convert, then tap ✓ or ★.",clearAll:"Clear all",confirmClear:"Clear all history?",
+language:"Language",theme:"Theme",dark:"Dark",light:"Light",auto:"System",numStyle:"Number format",nsIntl:"1,234,567.89",nsLakh:"12,34,567.89 (lakh)",nsBn:"১২,৩৪,৫৬৭.৮৯ (Bengali)",nsFr:"1 234 567,89",
+wordsToggle:"Show in words",autoRefresh:"Refresh rates on open",reset:"Reset all data",confirmReset:"All settings, history and alerts will be erased. Sure?",
+company:"Company",devBy:"Developed by",dataSrc:"Rate sources",version:"Version",
+aboutText:"Sarraf — Arabic for ‘money changer’. A smart converter built for Bangladesh and Côte d'Ivoire: live rates, offline maths, calculator, transfer comparison, charts, alerts and gold prices in one app.",
+fresh:"Updated",hoursAgo:"{n}h ago",minsAgo:"{n} min ago",daysAgo:"{n}d ago",justNow:"just now",
+alertSet:"Alert set ✓",invalid:"Enter a valid number",installed:"Installed ✓",andW:"and",pointW:"point"}
+};
+const t = (k, v) => { let s = (T[S.lang] && T[S.lang][k]) ?? T.en[k] ?? k; if (v) for (const x in v) s = s.replace("{"+x+"}", v[x]); return s; };
+
+/* ================= STATE ================= */
+const LS = "sarraf.state.v1", LR = "sarraf.rates.v1";
+const DEF = {
+  lang:"bn", theme:"dark", num:"intl", words:true, auto:true,
+  list:["USD","BDT","XOF","EUR"], base:"USD", expr:"50",
+  chart:{a:"USD",b:"BDT",range:30},
+  remit:{a:"XOF",b:"BDT",mode:"send",amt:"100000"},
+  providers:[
+    {id:"p1",name:"Western Union",type:"margin",value:2.5,fee:3000,ex:true},
+    {id:"p2",name:"Bank",type:"margin",value:4,fee:5000,ex:true}
+  ],
+  alerts:[], alertsTs:0, history:[], goldCur:"BDT"
+};
+let S;
+try { S = Object.assign(structuredClone(DEF), JSON.parse(localStorage.getItem(LS) || "{}")); } catch(e) { S = structuredClone(DEF); }
+const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){} };
+
+/* built-in fallback rates (per 1 USD), 28 Nov 2026 */
+const BUILTIN = {base:"USD", time:Date.parse("2026-11-28T11:45:00Z"), src:"builtin",
+  rates:{USD:1,BDT:124.8886,XOF:599.655,XAF:599.655,EUR:599.655/PEG_XOF,SAR:3.75,AED:3.6725,QAR:3.64,OMR:0.3845,BHD:0.376,JOD:0.709,HKD:7.78}};
+let R;
+try { R = JSON.parse(localStorage.getItem(LR) || "null"); } catch(e) { R = null; }
+if (!R || !R.rates || !R.rates.BDT) R = structuredClone(BUILTIN);
+let online = navigator.onLine;
+
+function applyPeg(rates){
+  if (rates.EUR) { rates.XOF = rates.EUR * PEG_XOF; rates.XAF = rates.EUR * PEG_XOF; }
+  return rates;
+}
+applyPeg(R.rates);
+const has = c => R.rates[c] > 0;
+const rate = (a, b) => (R.rates[b] || NaN) / (R.rates[a] || NaN);
+
+/* ================= CURRENCY META ================= */
+const POPULAR = ["BDT","XOF","USD","EUR","SAR","AED","GBP","INR","CNY","XAF","QAR","KWD","OMR","MYR","NGN","GHS","CAD","TRY","PKR","MAD"];
+const ZERO_DEC = new Set(["XOF","XAF","JPY","KRW","VND","CLP","UGX","RWF","GNF","KMF","PYG","ISK","IDR","XPF","BIF","DJF","VUV"]);
+const FLAG_MAP = {EUR:"EU",XOF:null,XAF:null,XPF:null,XCD:null,XAU:null,XAG:null,ANG:"CW",BTC:null,ETH:null};
+const EXTRA_NAMES = {BTC:"Bitcoin",ETH:"Ethereum"};
+function flagOf(c){
+  if (c in FLAG_MAP && FLAG_MAP[c] === null) return null;
+  const cc = FLAG_MAP[c] || c.slice(0,2);
+  if (!/^[A-Z]{2}$/.test(cc)) return null;
+  return String.fromCodePoint(...[...cc].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
+}
+function flagHTML(c, cls=""){
+  const f = flagOf(c);
+  if (f) return `<span class="flag ${cls}">${f}</span>`;
+  const txt = (c==="XOF"||c==="XAF") ? "CFA" : c;
+  return `<span class="flag txt ${cls}">${txt}</span>`;
+}
+let DN = {};
+function curName(c){
+  if (EXTRA_NAMES[c]) return EXTRA_NAMES[c];
+  try { DN[S.lang] = DN[S.lang] || new Intl.DisplayNames([S.lang], {type:"currency"}); const n = DN[S.lang].of(c); if (n && n !== c) return n; } catch(e){}
+  try { DN.en = DN.en || new Intl.DisplayNames(["en"], {type:"currency"}); return DN.en.of(c); } catch(e){ return c; }
+}
+function knownCodes(){
+  return Object.keys(R.rates).filter(c => /^[A-Z]{3}$/.test(c) && c !== "XAU" && c !== "XAG" && c !== "XPT" && c !== "XPD" && c !== "XDR" &&
+    (EXTRA_NAMES[c] || (()=>{ try{ return new Intl.DisplayNames(["en"],{type:"currency"}).of(c) !== c; }catch(e){ return true; } })()));
+}
+
+/* ================= NUMBERS ================= */
+function numLocale(){ return {intl:"en-US",lakh:"en-IN",bn:"bn-BD",fr:"fr-FR"}[S.num] || "en-US"; }
+function fmt(v, c, opts={}){
+  if (!isFinite(v)) return "–";
+  const a = Math.abs(v);
+  let o;
+  if (opts.rate) o = a >= 100 ? {maximumFractionDigits:2,minimumFractionDigits:2} : a >= 1 ? {maximumFractionDigits:4,minimumFractionDigits:4} : {maximumSignificantDigits:5};
+  else if (a > 0 && a < 1 && !ZERO_DEC.has(c)) o = {maximumSignificantDigits:4};
+  else { const d = ZERO_DEC.has(c) ? 0 : 2; o = {minimumFractionDigits:d, maximumFractionDigits:d}; }
+  try { return new Intl.NumberFormat(numLocale(), o).format(v); } catch(e){ return v.toFixed(2); }
+}
+const fmtInt = v => { try { return new Intl.NumberFormat(numLocale()).format(v); } catch(e){ return String(v); } };
+const BN_DIG = "০১২৩৪৫৬৭৮৯";
+const toBnDigits = s => S.num === "bn" ? String(s).replace(/[0-9]/g, d => BN_DIG[d]) : String(s);
+
+/* ---- safe calculator ---- */
+function evalExpr(src){
+  const s = String(src).replace(/[×x]/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/,/g,"").replace(/\s/g,"").replace(/[+\-*/]+$/,"");
+  if (!s) return NaN;
+  let i = 0;
+  const peek = () => s[i];
+  function num(){
+    let st = i; while (i < s.length && /[0-9.]/.test(s[i])) i++;
+    if (st === i) throw 0;
+    const v = parseFloat(s.slice(st, i)); if (!isFinite(v)) throw 0; return v;
+  }
+  function factor(){
+    let neg = false; while (peek() === "-") { neg = !neg; i++; }
+    let v;
+    if (peek() === "(") { i++; v = expr().v; if (peek() === ")") i++; }
+    else v = num();
+    let pct = false;
+    if (peek() === "%") { i++; v = v / 100; pct = true; }
+    return {v: neg ? -v : v, pct};
+  }
+  function term(){
+    let f = factor(), v = f.v, pct = f.pct;
+    while (peek() === "*" || peek() === "/") { const op = s[i++]; const g = factor(); v = op === "*" ? v * g.v : v / g.v; pct = false; }
+    return {v, pct};
+  }
+  function expr(){
+    let a = term().v;
+    while (peek() === "+" || peek() === "-") {
+      const op = s[i++]; const b = term();
+      const bv = b.pct ? a * b.v : b.v;
+      a = op === "+" ? a + bv : a - bv;
+    }
+    return {v:a};
+  }
+  try { const r = expr().v; if (i < s.length) return NaN; return r; } catch(e){ return NaN; }
+}
+const hasOp = s => /[+\-*/%×÷−]/.test(String(s).replace(/^-/,""));
+const prettyExpr = s => String(s).replace(/\*/g," × ").replace(/\//g," ÷ ").replace(/(\d)-/g,"$1 − ").replace(/\+/g," + ");
+
+/* ---- number to words ---- */
+const BN100 = ["শূন্য","এক","দুই","তিন","চার","পাঁচ","ছয়","সাত","আট","নয়","দশ","এগারো","বারো","তেরো","চৌদ্দ","পনেরো","ষোলো","সতেরো","আঠারো","উনিশ","বিশ",
+"একুশ","বাইশ","তেইশ","চব্বিশ","পঁচিশ","ছাব্বিশ","সাতাশ","আঠাশ","ঊনত্রিশ","ত্রিশ","একত্রিশ","বত্রিশ","তেত্রিশ","চৌত্রিশ","পঁয়ত্রিশ","ছত্রিশ","সাঁইত্রিশ","আটত্রিশ","ঊনচল্লিশ","চল্লিশ",
+"একচল্লিশ","বিয়াল্লিশ","তেতাল্লিশ","চুয়াল্লিশ","পঁয়তাল্লিশ","ছেচল্লিশ","সাতচল্লিশ","আটচল্লিশ","ঊনপঞ্চাশ","পঞ্চাশ","একান্ন","বায়ান্ন","তিপ্পান্ন","চুয়ান্ন","পঞ্চান্ন","ছাপ্পান্ন","সাতান্ন","আটান্ন","ঊনষাট","ষাট",
+"একষট্টি","বাষট্টি","তেষট্টি","চৌষট্টি","পঁয়ষট্টি","ছেষট্টি","সাতষট্টি","আটষট্টি","ঊনসত্তর","সত্তর","একাত্তর","বাহাত্তর","তিয়াত্তর","চুয়াত্তর","পঁচাত্তর","ছিয়াত্তর","সাতাত্তর","আটাত্তর","ঊনআশি","আশি",
+"একাশি","বিরাশি","তিরাশি","চুরাশি","পঁচাশি","ছিয়াশি","সাতাশি","অষ্টআশি","ঊননব্বই","নব্বই","একানব্বই","বিরানব্বই","তিরানব্বই","চুরানব্বই","পঁচানব্বই","ছিয়ানব্বই","সাতানব্বই","আটানব্বই","নিরানব্বই"];
+function bnWords(n){
+  if (n === 0) return BN100[0];
+  const out = [];
+  const crore = Math.floor(n / 1e7); n %= 1e7;
+  if (crore) out.push(bnWords(crore) + " কোটি");
+  const lakh = Math.floor(n / 1e5); n %= 1e5;
+  if (lakh) out.push(BN100[lakh] + " লাখ");
+  const th = Math.floor(n / 1000); n %= 1000;
+  if (th) out.push(BN100[th] + " হাজার");
+  const h = Math.floor(n / 100); n %= 100;
+  if (h) out.push(BN100[h] + "শো");
+  if (n) out.push(BN100[n]);
+  return out.join(" ");
+}
+const EN1 = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+const EN10 = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+const en99 = n => n < 20 ? EN1[n] : EN10[Math.floor(n/10)] + (n%10 ? "-" + EN1[n%10] : "");
+const en999 = n => { const h = Math.floor(n/100), r = n%100; return [h ? EN1[h] + " hundred" : "", r ? en99(r) : ""].filter(Boolean).join(" "); };
+function enWords(n){
+  if (n === 0) return "zero";
+  const sc = [[1e12,"trillion"],[1e9,"billion"],[1e6,"million"],[1e3,"thousand"]], out = [];
+  for (const [v, w] of sc) { const q = Math.floor(n / v); if (q) { out.push(en999(q) + " " + w); n %= v; } }
+  if (n) out.push(en999(n));
+  return out.join(" ");
+}
+const FR1 = ["zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","treize","quatorze","quinze","seize","dix-sept","dix-huit","dix-neuf"];
+const FR10 = ["","","vingt","trente","quarante","cinquante","soixante"];
+function fr99(n, fin){
+  if (n < 20) return FR1[n];
+  const t = Math.floor(n/10), u = n%10;
+  if (t === 7) return "soixante" + (u === 1 ? " et onze" : "-" + FR1[10+u]);
+  if (t === 9) return "quatre-vingt-" + FR1[10+u];
+  if (t === 8) return u === 0 ? (fin ? "quatre-vingts" : "quatre-vingt") : "quatre-vingt-" + FR1[u];
+  return FR10[t] + (u === 0 ? "" : u === 1 ? " et un" : "-" + FR1[u]);
+}
+function fr999(n, fin){
+  const h = Math.floor(n/100), r = n%100;
+  let hs = h === 0 ? "" : h === 1 ? "cent" : FR1[h] + " cent" + (r === 0 && fin ? "s" : "");
+  return [hs, r ? fr99(r, fin) : ""].filter(Boolean).join(" ");
+}
+function frWords(n){
+  if (n === 0) return "zéro";
+  const out = [];
+  const bil = Math.floor(n/1e9); n %= 1e9;
+  if (bil) out.push(bil === 1 ? "un milliard" : frWords(bil) + " milliards");
+  const mil = Math.floor(n/1e6); n %= 1e6;
+  if (mil) out.push(mil === 1 ? "un million" : fr999(mil, true) + " millions");
+  const th = Math.floor(n/1000); n %= 1000;
+  if (th) out.push(th === 1 ? "mille" : fr999(th, false) + " mille");
+  if (n) out.push(fr999(n, true));
+  return out.join(" ");
+}
+const CUR_WORDS = {
+  bn:{BDT:["টাকা","পয়সা"],USD:["মার্কিন ডলার","সেন্ট"],EUR:["ইউরো","সেন্ট"],XOF:["সিএফএ ফ্রাঁ",null],XAF:["সিএফএ ফ্রাঁ (মধ্য আফ্রিকা)",null],SAR:["সৌদি রিয়াল","হালালা"],AED:["দিরহাম","ফিলস"],GBP:["ব্রিটিশ পাউন্ড","পেন্স"],INR:["ভারতীয় রুপি","পয়সা"],QAR:["কাতারি রিয়াল","দিরহাম"],KWD:["কুয়েতি দিনার","ফিলস"],OMR:["ওমানি রিয়াল","বাইসা"],MYR:["মালয়েশিয়ান রিঙ্গিত","সেন"],CNY:["চীনা ইউয়ান","ফেন"],CAD:["কানাডিয়ান ডলার","সেন্ট"]},
+  en:{BDT:["taka","poisha"],USD:["US dollars","cents"],EUR:["euros","cents"],XOF:["CFA francs",null],XAF:["Central African CFA francs",null],SAR:["Saudi riyals","halalas"],AED:["dirhams","fils"],GBP:["pounds sterling","pence"],INR:["rupees","paise"]},
+  fr:{BDT:["taka","poisha"],USD:["dollars américains","cents"],EUR:["euros","centimes"],XOF:["francs CFA",null],XAF:["francs CFA (CEMAC)",null],SAR:["riyals saoudiens","halalas"],AED:["dirhams","fils"],GBP:["livres sterling","pence"],INR:["roupies","paise"]}
+};
+function amountWords(v, c, lang = S.lang){
+  if (!isFinite(v) || v < 0 || v >= 1e15) return "";
+  const W = lang === "bn" ? bnWords : lang === "fr" ? frWords : enWords;
+  const zero = ZERO_DEC.has(c);
+  let ip = Math.floor(v), fp = zero ? 0 : Math.round((v - ip) * 100);
+  if (zero && v - ip >= 0.5) ip += 1;
+  if (fp === 100) { ip += 1; fp = 0; }
+  const cw = (CUR_WORDS[lang] && CUR_WORDS[lang][c]) || [curName(c), null];
+  let s = W(ip) + " " + cw[0];
+  if (fp) {
+    const tAnd = (T[lang]||T.en).andW, tPt = (T[lang]||T.en).pointW;
+    if (cw[1]) s += (tAnd ? " " + tAnd : "") + " " + W(fp) + " " + cw[1];
+    else s = W(ip) + " " + tPt + " " + W(fp) + " " + cw[0];
+  }
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* ================= RATES FETCH ================= */
+const FAW = d => [`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${d}/v1/currencies/usd.min.json`,`https://${d}.currency-api.pages.dev/v1/currencies/usd.min.json`];
+async function getJSON(url, ms=9000){
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), ms);
+  try { const r = await fetch(url, {signal:ctl.signal, cache:"no-store"}); if (!r.ok) throw new Error(r.status); return await r.json(); }
+  finally { clearTimeout(tm); }
+}
+async function fawaz(date){
+  let last;
+  for (const u of FAW(date)) { try { const j = await getJSON(u); const o = {USD:1}; for (const k in j.usd) o[k.toUpperCase()] = j.usd[k]; return {date:j.date, rates:o}; } catch(e){ last = e; } }
+  throw last;
+}
+let refreshing = false;
+async function refreshRates(manual){
+  if (refreshing) return; refreshing = true;
+  $("#btnRefresh").classList.add("spin");
+  if (manual) toast(t("updating"));
+  let ok = false;
+  try {
+    const j = await getJSON("https://open.er-api.com/v6/latest/USD");
+    if (j.result !== "success") throw 0;
+    const rates = Object.assign({}, j.rates);
+    try { const extra = await fawaz("latest"); for (const k of ["XAU","XAG","BTC","ETH"]) if (extra.rates[k]) rates[k] = extra.rates[k]; } catch(e){}
+    R = {base:"USD", time:j.time_last_update_unix*1000, src:"er-api", fetched:Date.now(), rates:applyPeg(rates)}; ok = true;
+  } catch(e) {
+    try { const f = await fawaz("latest"); R = {base:"USD", time:Date.parse(f.date+"T00:00:00Z"), src:"fawaz", fetched:Date.now(), rates:applyPeg(f.rates)}; ok = true; } catch(e2){}
+  }
+  refreshing = false;
+  $("#btnRefresh").classList.remove("spin");
+  if (ok) { online = true; try { localStorage.setItem(LR, JSON.stringify(R)); } catch(e){} if (manual) toast(t("updatedOk")); checkAlerts(); }
+  else { online = false; if (manual) toast(t("updateFail")); }
+  renderAll();
+}
+
+/* ================= CONVERT VIEW ================= */
+let editing = false, kpOpen = false, fresh = true;
+const amount = () => { const v = evalExpr(S.expr); return isFinite(v) ? v : (S._last || 0); };
+function renderRows(){
+  const base = S.base, amt = amount(); S._last = amt;
+  const el = $("#rows");
+  el.classList.toggle("editing", editing);
+  el.innerHTML = S.list.map((c, idx) => {
+    const isBase = c === base;
+    const v = isBase ? amt : amt * rate(base, c);
+    let main, sub;
+    if (isBase && kpOpen) {
+      main = esc(toBnDigits(prettyExpr(S.expr))) + '<span class="caret"></span>';
+      sub = hasOp(S.expr) ? `<div class="eq">= ${toBnDigits(fmt(amt, c))}</div>` : `<div class="r">${t("youConvert")}</div>`;
+    } else {
+      main = toBnDigits(fmt(v, c));
+      sub = isBase ? `<div class="r">${esc(curName(c))}</div>` : `<div class="r">${toBnDigits("1 " + base + " → " + fmt(rate(base, c), c, {rate:1}) + " " + c)}</div>`;
+    }
+    const long = String(main).replace(/<[^>]+>/g,"").length > 13 ? " long" : "";
+    return `<div class="row${isBase ? " base" : ""}" data-c="${c}" data-i="${idx}">
+      ${isBase ? `<span class="lbl">${t("youConvert")}</span>` : ""}
+      <button class="cur" data-pick="${idx}">${flagHTML(c)}<span class="code">${c}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></span></button>
+      <div class="amt" data-amt="${c}"><div class="v${long}">${main}</div>${sub}</div>
+      <div class="edit-tools"><button class="tool" data-up="${idx}">▲</button><button class="tool" data-down="${idx}">▼</button><button class="tool del" data-del="${idx}">✕</button></div>
+    </div>`;
+  }).join("");
+}
+function quickAmounts(c){
+  if (c === "XOF" || c === "XAF") return [1000,5000,10000,25000,50000,100000,500000];
+  if (c === "BDT" || c === "INR" || c === "PKR") return [500,1000,5000,10000,50000,100000];
+  if (ZERO_DEC.has(c)) return [1000,10000,100000,1000000];
+  return [1,10,50,100,500,1000,5000];
+}
+function renderChips(){
+  const html = quickAmounts(S.base).map(v => `<button class="chip${amount() === v ? " on" : ""}" data-q="${v}">${toBnDigits(fmtInt(v))} ${S.base}</button>`).join("");
+  $("#quickChips").innerHTML = html; $("#kpChips").innerHTML = html;
+}
+function ago(ms){
+  const d = Date.now() - ms, m = Math.round(d/60000);
+  if (m < 2) return t("justNow"); if (m < 60) return t("minsAgo",{n:m});
+  const h = Math.round(m/60); if (h < 48) return t("hoursAgo",{n:h}); return t("daysAgo",{n:Math.round(h/24)});
+}
+function renderStatus(){
+  const tm = new Date(R.time);
+  const dstr = tm.toLocaleString(S.lang === "bn" ? "bn-BD" : S.lang === "fr" ? "fr-FR" : "en-GB", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  let cls = "", note = t("midMarket");
+  if (R.src === "builtin") { cls = "old"; note = t("builtin"); }
+  else if (!online) { cls = "off"; note = t("offline"); }
+  $("#status").innerHTML = `<span class="dot ${cls}"></span><span>${t("lastUpdated")}: ${esc(dstr)}</span><span class="sp"></span><span>${esc(note)}</span>`;
+}
+function renderWords(){
+  $("#wordsCard").style.display = S.words ? "" : "none";
+  if (!S.words) return;
+  const amt = amount();
+  $("#wordsBody").innerHTML = S.list.map(c => {
+    const v = c === S.base ? amt : amt * rate(S.base, c);
+    return `<div class="wline"><b>${c} · ${toBnDigits(fmt(v,c))}</b>${esc(amountWords(v, c))}</div>`;
+  }).join("");
+}
+function renderConvert(){ renderRows(); renderChips(); renderStatus(); renderWords(); $("#btnArrange span").textContent = editing ? t("done") : t("arrange"); }
+
+/* keypad */
+const KEYS = [["C","fn"],["⌫","fn"],["%","op"],["÷","op"],["7"],["8"],["9"],["×","op"],["4"],["5"],["6"],["−","op"],["1"],["2"],["3"],["+","op"],["00"],["0"],["."],["✓","ok"]];
+$("#keys").innerHTML = KEYS.map(([k,c]) => `<button class="key ${c||""}" data-k="${k}">${k === "⌫" ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12z"/><path d="M17 9l-6 6M11 9l6 6"/></svg>' : k}</button>`).join("");
+function openKeypad(){ kpOpen = true; fresh = true; $("#keypad").classList.add("on"); $("#nav").style.display = "none"; renderConvert(); }
+function closeKeypad(commit){
+  if (!kpOpen) return;
+  kpOpen = false; $("#keypad").classList.remove("on"); $("#nav").style.display = "";
+  const v = evalExpr(S.expr);
+  S.expr = isFinite(v) ? String(+v.toFixed(8)) : "0";
+  save(); renderConvert();
+  if (commit) addHistory();
+}
+function press(k){
+  let e = S.expr;
+  const ops = "+-*/";
+  const lastCh = e.slice(-1);
+  const seg = e.split(/[+\-*/]/).pop();
+  if (/^\d$/.test(k) || k === "00") {
+    if (fresh) e = k === "00" ? "0" : k;
+    else if (seg === "0") e = e.slice(0, -1) + (k === "00" ? "0" : k);
+    else if (lastCh === "%") e += "*" + k;
+    else e += k;
+    if (e.replace(/[^0-9]/g,"").length > 18) return;
+  } else if (k === ".") {
+    if (fresh) e = "0.";
+    else if (!seg.includes(".")) e += (seg === "" || lastCh === "%") ? "0." : ".";
+  } else if (k === "C") { e = "0"; }
+  else if (k === "⌫") { e = fresh ? "0" : (e.slice(0, -1) || "0"); }
+  else if (k === "%") { if (/[\d.]$/.test(e)) e += "%"; }
+  else if (k === "✓") { closeKeypad(true); return; }
+  else {
+    const op = {"+":"+","−":"-","×":"*","÷":"/"}[k];
+    if (ops.includes(lastCh)) e = e.slice(0, -1) + op;
+    else if (e !== "0" || op === "-") e += op;
+  }
+  fresh = false; S.expr = e; save(); renderRows(); renderWords(); renderChips();
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+$("#keys").addEventListener("click", ev => { const b = ev.target.closest("[data-k]"); if (b) press(b.dataset.k); });
+document.addEventListener("keydown", ev => {
+  if (!kpOpen) return;
+  const m = {"*":"×","/":"÷","-":"−","+":"+","Enter":"✓","=":"✓","Backspace":"⌫","Escape":"✓",".":".",",":".","%":"%","Delete":"C"};
+  if (/^\d$/.test(ev.key)) press(ev.key); else if (m[ev.key]) { ev.preventDefault(); press(m[ev.key]); }
+});
+
+$("#rows").addEventListener("click", ev => {
+  const pick = ev.target.closest("[data-pick]");
+  if (pick && !editing) { openPicker(c => { const i = +pick.dataset.pick; const old = S.list[i]; if (S.list.includes(c)) { const j = S.list.indexOf(c); S.list[j] = old; } S.list[i] = c; if (S.base === old) S.base = c; save(); renderConvert(); }, S.list[+pick.dataset.pick]); return; }
+  const up = ev.target.closest("[data-up]"), dn = ev.target.closest("[data-down]"), del = ev.target.closest("[data-del]");
+  if (up || dn) { const i = +(up || dn).dataset[up ? "up" : "down"], j = up ? i - 1 : i + 1; if (j < 0 || j >= S.list.length) return; [S.list[i], S.list[j]] = [S.list[j], S.list[i]]; save(); renderConvert(); return; }
+  if (del) { if (S.list.length <= 2) return; const c = S.list.splice(+del.dataset.del, 1)[0]; if (S.base === c) { S.base = S.list[0]; } save(); renderConvert(); return; }
+  const row = ev.target.closest(".row");
+  if (row && !editing) {
+    const c = row.dataset.c;
+    if (c !== S.base) { const v = amount() * rate(S.base, c); S.base = c; S.expr = String(ZERO_DEC.has(c) ? Math.round(v) : +v.toFixed(2)); }
+    save(); openKeypad();
+  }
+});
+document.addEventListener("click", ev => { if (kpOpen && !ev.target.closest("#keypad") && !ev.target.closest(".row") && !ev.target.closest("#sheet")) closeKeypad(true); }, true);
+function onChip(ev){ const b = ev.target.closest("[data-q]"); if (!b) return; S.expr = b.dataset.q; fresh = true; save(); renderConvert(); }
+$("#quickChips").addEventListener("click", onChip); $("#kpChips").addEventListener("click", onChip);
+$("#btnAdd").onclick = () => openPicker(c => { if (!S.list.includes(c)) S.list.push(c); save(); renderConvert(); });
+$("#btnArrange").onclick = () => { editing = !editing; renderConvert(); };
+$("#btnSave").onclick = () => addHistory(true);
+
+/* ================= PICKER ================= */
+function openPicker(cb, current){
+  const codes = knownCodes();
+  const pop = POPULAR.filter(c => codes.includes(c));
+  const rest = codes.filter(c => !pop.includes(c)).sort((a,b) => curName(a).localeCompare(curName(b)));
+  const item = c => `<button class="citem" data-c="${c}" data-s="${esc((c + " " + curName(c) + " " + (CUR_WORDS.bn[c]||[""])[0]).toLowerCase())}">${flagHTML(c)}<span class="n"><b>${c}</b><span>${esc(curName(c))}</span></span>${c === current ? '<span class="chk">✓</span>' : ""}</button>`;
+  openSheet(t("chooseCur"), `<input class="search" id="pSearch" placeholder="${esc(t("search"))}" autocomplete="off">
+    <div id="pList"><div class="sec-t">${t("popular")}</div>${pop.map(item).join("")}<div class="sec-t">${t("allCur")}</div>${rest.map(item).join("")}</div>`);
+  const list = $("#pList");
+  $("#pSearch").oninput = e => {
+    const q = e.target.value.trim().toLowerCase();
+    list.querySelectorAll(".sec-t").forEach(x => x.style.display = q ? "none" : "");
+    const seen = new Set();
+    list.querySelectorAll(".citem").forEach(x => { const show = !q || x.dataset.s.includes(q); const dup = q && seen.has(x.dataset.c); x.style.display = show && !dup ? "" : "none"; if (show) seen.add(x.dataset.c); });
+  };
+  list.onclick = e => { const b = e.target.closest(".citem"); if (!b) return; closeSheet(); cb(b.dataset.c); };
+}
+
+/* ================= SHEET ================= */
+function openSheet(title, html){ $("#sheetTitle").textContent = title; $("#sheetBody").innerHTML = html; $("#sheetBg").classList.add("on"); $("#sheet").classList.add("on"); $("#sheetBody").scrollTop = 0; }
+function closeSheet(){ $("#sheetBg").classList.remove("on"); $("#sheet").classList.remove("on"); }
+$("#sheetBg").onclick = closeSheet; $("#sheetClose").onclick = closeSheet;
+
+/* ================= TOAST ================= */
+let tt; function toast(m){ const e = $("#toast"); e.textContent = m; e.classList.add("on"); clearTimeout(tt); tt = setTimeout(() => e.classList.remove("on"), 2300); }
+
+/* ================= HISTORY ================= */
+function addHistory(manual){
+  const amt = amount(); if (!amt) return;
+  const snap = {t:Date.now(), base:S.base, amt, list:[...S.list], res:Object.fromEntries(S.list.map(c => [c, c === S.base ? amt : amt * rate(S.base, c)]))};
+  const last = S.history[0];
+  if (last && last.base === snap.base && last.amt === snap.amt && !manual) return;
+  if (last && last.base === snap.base && last.amt === snap.amt && manual) { toast(t("savedHist")); return; }
+  S.history.unshift(snap); S.history = S.history.slice(0, 60); save();
+  if (manual) toast(t("savedHist"));
+}
+function renderHistory(){
+  const el = $("#histList");
+  if (!S.history.length) { el.innerHTML = `<div class="empty">${t("noHist")}</div>`; return; }
+  el.innerHTML = S.history.map((h, i) => {
+    const others = h.list.filter(c => c !== h.base).slice(0, 3).map(c => toBnDigits(fmt(h.res[c], c)) + " " + c).join(" · ");
+    const d = new Date(h.t).toLocaleString(S.lang === "bn" ? "bn-BD" : S.lang === "fr" ? "fr-FR" : "en-GB", {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+    return `<div class="hitem" data-h="${i}">${flagHTML(h.base)}<div class="n"><b>${toBnDigits(fmt(h.amt, h.base))} ${h.base}</b><span>= ${esc(others)}</span><span>${esc(d)}</span></div><button class="tool del" data-hdel="${i}">✕</button></div>`;
+  }).join("");
+}
+$("#histList").onclick = e => {
+  const d = e.target.closest("[data-hdel]");
+  if (d) { S.history.splice(+d.dataset.hdel, 1); save(); renderHistory(); return; }
+  const h = e.target.closest("[data-h]"); if (!h) return;
+  const x = S.history[+h.dataset.h];
+  S.list = [...x.list]; S.base = x.base; S.expr = String(x.amt); save(); go("convert");
+};
+$("#btnClearHist").onclick = () => { if (confirm(t("confirmClear"))) { S.history = []; save(); renderHistory(); } };
+
+/* ================= SHARE ================= */
+function shareText(){
+  const amt = amount();
+  const lines = [`💱 ${toBnDigits(fmt(amt, S.base))} ${S.base} =`];
+  S.list.filter(c => c !== S.base).forEach(c => lines.push(`${flagOf(c) || "•"} ${toBnDigits(fmt(amt * rate(S.base, c), c))} ${c}`));
+  lines.push("", `${t("midMarket")} · ${new Date(R.time).toLocaleDateString(S.lang === "bn" ? "bn-BD" : S.lang === "fr" ? "fr-FR" : "en-GB")}`, "— Sarraf · Alfaris Labs");
+  return lines.join("\n");
+}
+async function shareImage(){
+  const W = 1080, rowsN = S.list.length, H = 360 + rowsN * 150 + 140;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const g = cv.getContext("2d");
+  const grd = g.createLinearGradient(0,0,W,H); grd.addColorStop(0,"#15171C"); grd.addColorStop(1,"#0B0C0F"); g.fillStyle = grd; g.fillRect(0,0,W,H);
+  const font = 'system-ui,"Noto Sans Bengali",sans-serif';
+  try { const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = "icon-192.png"; }); g.drawImage(img, 70, 70, 110, 110); } catch(e){}
+  g.fillStyle = "#F3F4F6"; g.font = `700 64px ${font}`; g.fillText("Sarraf", 210, 140);
+  g.fillStyle = "#9097A3"; g.font = `400 34px ${font}`; g.fillText("Smart Currency Converter · Alfaris Labs", 210, 186);
+  const amt = amount(); let y = 300;
+  S.list.forEach(c => {
+    const v = c === S.base ? amt : amt * rate(S.base, c);
+    g.fillStyle = c === S.base ? "rgba(233,180,76,.16)" : "#1B1E24";
+    const rr = (x, y2, w, h, r) => { g.beginPath(); g.moveTo(x+r,y2); g.arcTo(x+w,y2,x+w,y2+h,r); g.arcTo(x+w,y2+h,x,y2+h,r); g.arcTo(x,y2+h,x,y2,r); g.arcTo(x,y2,x+w,y2,r); g.closePath(); };
+    rr(60, y, W-120, 128, 36); g.fill();
+    if (c === S.base) { g.strokeStyle = "#E9B44C"; g.lineWidth = 4; g.stroke(); }
+    g.fillStyle = "#F3F4F6"; g.font = `600 46px ${font}`; g.fillText((flagOf(c) ? flagOf(c) + " " : "") + c, 100, y + 80);
+    g.textAlign = "right"; g.font = `700 54px ${font}`; g.fillStyle = c === S.base ? "#E9B44C" : "#F3F4F6"; g.fillText(toBnDigits(fmt(v, c)), W - 100, y + 82); g.textAlign = "left";
+    y += 150;
+  });
+  g.fillStyle = "#646B77"; g.font = `400 30px ${font}`;
+  g.fillText(`${t("midMarket")} · ${new Date(R.time).toLocaleString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}`, 70, H - 70);
+  const blob = await new Promise(r => cv.toBlob(r, "image/png"));
+  const file = new File([blob], "sarraf.png", {type:"image/png"});
+  if (navigator.canShare && navigator.canShare({files:[file]})) { try { await navigator.share({files:[file], title:"Sarraf"}); return; } catch(e){ if (e.name === "AbortError") return; } }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "sarraf.png"; a.click();
+}
+$("#btnShare").onclick = () => {
+  if (kpOpen) closeKeypad(false);
+  openSheet(t("share"), `<pre class="card" style="white-space:pre-wrap;font-family:inherit;font-size:14.5px;margin:0 0 12px">${esc(shareText())}</pre>
+    <button class="btn" id="shT">${t("shareText")}</button><button class="btn ghost" id="shI">${t("shareImage")}</button><button class="btn ghost" id="shC">${t("copy")}</button>`);
+  $("#shT").onclick = async () => { const txt = shareText(); if (navigator.share) { try { await navigator.share({text:txt}); closeSheet(); return; } catch(e){ if (e.name === "AbortError") return; } } copyText(txt); };
+  $("#shI").onclick = () => { shareImage(); closeSheet(); };
+  $("#shC").onclick = () => copyText(shareText());
+  addHistory();
+};
+async function copyText(s){ try { await navigator.clipboard.writeText(s); } catch(e){ const ta = document.createElement("textarea"); ta.value = s; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); } toast(t("copied")); }
+
+/* ================= CHART ================= */
+const RANGES = {7:{n:8,step:1},30:{n:16,step:2},90:{n:16,step:6},365:{n:13,step:30}};
+const HKEY = "sarraf.hist.";
+const memDay = {};
+function dateStr(d){ return d.toISOString().slice(0,10); }
+async function dayRates(ds){
+  if (memDay[ds]) return memDay[ds];
+  try { const c = JSON.parse(localStorage.getItem(HKEY + ds) || "null"); if (c) return memDay[ds] = c; } catch(e){}
+  const f = await fawaz(ds);
+  const keep = {};
+  const want = new Set([...S.list, S.chart.a, S.chart.b, S.remit.a, S.remit.b, ...POPULAR, "XAU", "XAG"]);
+  for (const k of want) if (f.rates[k]) keep[k] = f.rates[k];
+  if (keep.EUR) { keep.XOF = keep.EUR * PEG_XOF; keep.XAF = keep.XOF; }
+  memDay[ds] = keep;
+  try { localStorage.setItem(HKEY + ds, JSON.stringify(keep)); } catch(e){ pruneHist(); }
+  return keep;
+}
+function pruneHist(){ const ks = Object.keys(localStorage).filter(k => k.startsWith(HKEY)).sort(); ks.slice(0, Math.max(0, ks.length - 120)).forEach(k => localStorage.removeItem(k)); }
+let chartToken = 0;
+async function renderChart(){
+  const {a, b, range} = S.chart;
+  $("#chFrom").innerHTML = flagHTML(a) + a; $("#chTo").innerHTML = flagHTML(b) + b;
+  $("#chRanges").innerHTML = [7,30,90,365].map(r => `<button data-r="${r}" class="${r === range ? "on" : ""}">${t("r" + r)}</button>`).join("");
+  const cur = rate(a, b);
+  $("#chRate").textContent = toBnDigits(`1 ${a} = ${fmt(cur, b, {rate:1})} ${b}`);
+  const box = $("#chartBox");
+  box.innerHTML = `<div class="center-msg">${t("loading")}</div>`; $("#chStats").innerHTML = ""; $("#chChg").innerHTML = "&nbsp;";
+  const tok = ++chartToken;
+  const {n, step} = RANGES[range];
+  const now = new Date(); now.setUTCDate(now.getUTCDate() - 1);
+  const dates = []; for (let i = n - 1; i >= 0; i--) { const d = new Date(now); d.setUTCDate(d.getUTCDate() - i * step); dates.push(dateStr(d)); }
+  const res = await Promise.allSettled(dates.map(dayRates));
+  if (tok !== chartToken) return;
+  const pts = [];
+  res.forEach((r, i) => { if (r.status === "fulfilled" && r.value[a] && r.value[b]) pts.push({d:dates[i], v:r.value[b] / r.value[a]}); });
+  if (isFinite(cur) && R.src !== "builtin") pts.push({d:dateStr(new Date(R.time)), v:cur, now:true});
+  if (pts.length < 2) { box.innerHTML = `<div class="center-msg">${t("chartErr")}</div>`; return; }
+  const vs = pts.map(p => p.v), hi = Math.max(...vs), lo = Math.min(...vs), avg = vs.reduce((x,y)=>x+y,0)/vs.length;
+  const ch = (pts[pts.length-1].v - pts[0].v) / pts[0].v * 100;
+  $("#chChg").className = "chg " + (ch >= 0 ? "up" : "dn");
+  $("#chChg").textContent = toBnDigits(`${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(2)}% · ${t("r" + range)}`);
+  $("#chStats").innerHTML = [[t("high"),hi],[t("low"),lo],[t("avg"),avg]].map(([l,v]) => `<div class="stat"><span>${l}</span><b>${toBnDigits(fmt(v, b, {rate:1}))}</b></div>`).join("");
+  const W = 360, H = 210, P = 12, span = (hi - lo) || hi * 0.001 || 1;
+  const X = i => P + i * (W - 2*P) / (pts.length - 1), Y = v => H - 22 - (v - lo) / span * (H - 50);
+  const line = pts.map((p,i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join("");
+  const color = ch >= 0 ? "var(--green)" : "var(--red)";
+  const lab = d => new Date(d + "T00:00:00Z").toLocaleDateString(S.lang === "bn" ? "bn-BD" : S.lang === "fr" ? "fr-FR" : "en-GB", range === 365 ? {month:"short",year:"2-digit"} : {day:"numeric",month:"short"});
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" id="chSvg">
+    <defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${ch >= 0 ? "#34C27A" : "#F0606A"}" stop-opacity=".32"/><stop offset="1" stop-color="${ch >= 0 ? "#34C27A" : "#F0606A"}" stop-opacity="0"/></linearGradient></defs>
+    <line x1="${P}" x2="${W-P}" y1="${Y(hi)}" y2="${Y(hi)}" stroke="var(--line)" stroke-dasharray="3 4"/>
+    <line x1="${P}" x2="${W-P}" y1="${Y(lo)}" y2="${Y(lo)}" stroke="var(--line)" stroke-dasharray="3 4"/>
+    <path d="${line}L${X(pts.length-1)},${H-22}L${X(0)},${H-22}Z" fill="url(#gA)"/>
+    <path d="${line}" fill="none" stroke="${color}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <text x="${P}" y="${H-5}" font-size="10" fill="var(--muted)">${esc(lab(pts[0].d))}</text>
+    <text x="${W-P}" y="${H-5}" font-size="10" fill="var(--muted)" text-anchor="end">${esc(lab(pts[pts.length-1].d))}</text>
+    <line id="chCross" y1="10" y2="${H-22}" stroke="var(--muted)" stroke-width="1" style="display:none" vector-effect="non-scaling-stroke"/>
+    <circle id="chDot" r="4.5" fill="${color}" stroke="var(--card)" stroke-width="2" style="display:none"/>
+  </svg><div class="tip" id="chTip"></div>`;
+  const svg = $("#chSvg"), tip = $("#chTip"), dot = $("#chDot"), cross = $("#chCross");
+  const move = e => {
+    const r = svg.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * W;
+    let i = Math.round((x - P) / ((W - 2*P) / (pts.length - 1))); i = Math.max(0, Math.min(pts.length - 1, i));
+    const p = pts[i];
+    dot.setAttribute("cx", X(i)); dot.setAttribute("cy", Y(p.v)); dot.style.display = "";
+    cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i)); cross.style.display = "";
+    tip.style.display = "block"; tip.style.left = (X(i) / W * r.width) + "px";
+    tip.textContent = toBnDigits(`${lab(p.d)} · ${fmt(p.v, b, {rate:1})}`);
+  };
+  svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
+  svg.addEventListener("pointerleave", () => { tip.style.display = "none"; dot.style.display = "none"; cross.style.display = "none"; });
+}
+$("#chRanges").onclick = e => { const b = e.target.closest("[data-r]"); if (!b) return; S.chart.range = +b.dataset.r; save(); renderChart(); };
+$("#chSwap").onclick = () => { [S.chart.a, S.chart.b] = [S.chart.b, S.chart.a]; save(); renderChart(); };
+$("#chFrom").onclick = () => openPicker(c => { S.chart.a = c; save(); renderChart(); }, S.chart.a);
+$("#chTo").onclick = () => openPicker(c => { S.chart.b = c; save(); renderChart(); }, S.chart.b);
+
+/* ================= REMIT ================= */
+function provRate(p, a, b){
+  const mid = rate(a, b);
+  if (p.type === "rate") { if (p.a === a && p.b === b) return p.value; if (p.a === b && p.b === a) return 1 / p.value; return NaN; }
+  return mid * (1 - (p.value || 0) / 100);
+}
+function renderRemit(){
+  const {a, b, mode} = S.remit;
+  $("#rmFrom").innerHTML = flagHTML(a) + a; $("#rmTo").innerHTML = flagHTML(b) + b;
+  $$("#rmMode button").forEach(x => x.classList.toggle("on", x.dataset.m === mode));
+  const inCur = mode === "send" ? a : b;
+  $("#rmAmtLbl").textContent = (mode === "send" ? t("youSend") : t("theyGet")) + ` (${inCur})`;
+  const inp = $("#rmAmt"); if (document.activeElement !== inp) inp.value = S.remit.amt;
+  $("#rmChips").innerHTML = quickAmounts(inCur).map(v => `<button class="chip" data-rq="${v}">${toBnDigits(fmtInt(v))}</button>`).join("");
+  renderRemitResults();
+}
+function renderRemitResults(){
+  const {a, b, mode} = S.remit;
+  const X = evalExpr(S.remit.amt), mid = rate(a, b);
+  const el = $("#rmResults");
+  if (!isFinite(X) || X <= 0 || !isFinite(mid)) { el.innerHTML = ""; return; }
+  const midOut = mode === "send" ? X * mid : X / mid;
+  const outCur = mode === "send" ? b : a;
+  let html = `<div class="res"><div class="hd"><b>${t("midRef")}</b></div>
+    <div class="big">${toBnDigits(fmt(midOut, outCur))} ${outCur}</div>
+    <div class="meta"><span>${mode === "send" ? t("recvGets") : t("youNeed")}</span><span>1 ${a} = ${toBnDigits(fmt(mid, b, {rate:1}))} ${b}</span></div>
+    <div class="meta" style="margin-top:6px">${esc(amountWords(midOut, outCur))}</div></div>`;
+  const rows = S.providers.map(p => {
+    const r = provRate(p, a, b); if (!isFinite(r) || r <= 0) return null;
+    const fee = +p.fee || 0;
+    let out, diff;
+    if (mode === "send") { out = Math.max(0, (X - fee) * r); diff = midOut - out; }
+    else { out = X / r + fee; diff = out - midOut; }
+    return {p, r, fee, out, diff};
+  }).filter(Boolean);
+  rows.sort((x, y) => mode === "send" ? y.out - x.out : x.out - y.out);
+  rows.forEach((x, i) => {
+    const pct = midOut ? Math.abs(x.diff) / midOut * 100 : 0;
+    html += `<div class="res${i === 0 && rows.length > 1 ? " best" : ""}">
+      <div class="hd"><b>${esc(x.p.name)}</b>${i === 0 && rows.length > 1 ? `<span class="badge">${t("best")}</span>` : ""}${x.p.ex ? `<span class="badge ex">${t("example")}</span>` : ""}
+      <span class="acts"><button data-pe="${x.p.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button></span></div>
+      <div class="big">${toBnDigits(fmt(x.out, outCur))} ${outCur}</div>
+      <div class="meta"><span>${t("effRate")}: ${toBnDigits(fmt(x.r, b, {rate:1}))}</span><span>${t("fee")}: ${toBnDigits(fmt(x.fee, a))} ${a}</span></div>
+      <div class="meta" style="margin-top:4px"><span class="loss">${toBnDigits(fmt(Math.abs(x.diff), outCur))} ${outCur} (${toBnDigits(pct.toFixed(1))}%) ${mode === "send" ? t("loss") : t("extra")}</span></div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+$("#rmAmt").addEventListener("input", e => { S.remit.amt = e.target.value.replace(/[^\d.+\-*/%]/g, ""); save(); renderRemitResults(); });
+$("#rmChips").onclick = e => { const b = e.target.closest("[data-rq]"); if (!b) return; S.remit.amt = b.dataset.rq; $("#rmAmt").value = b.dataset.rq; save(); renderRemitResults(); };
+$("#rmMode").onclick = e => { const b = e.target.closest("[data-m]"); if (!b) return; S.remit.mode = b.dataset.m; save(); renderRemit(); };
+$("#rmSwap").onclick = () => { [S.remit.a, S.remit.b] = [S.remit.b, S.remit.a]; save(); renderRemit(); };
+$("#rmFrom").onclick = () => openPicker(c => { S.remit.a = c; save(); renderRemit(); }, S.remit.a);
+$("#rmTo").onclick = () => openPicker(c => { S.remit.b = c; save(); renderRemit(); }, S.remit.b);
+$("#rmResults").onclick = e => { const b = e.target.closest("[data-pe]"); if (b) provForm(S.providers.find(p => p.id === b.dataset.pe)); };
+$("#btnAddProv").onclick = () => provForm(null);
+function provForm(p){
+  const {a, b} = S.remit;
+  const isNew = !p; p = p ? {...p} : {id:"p" + Date.now(), name:"", type:"rate", value:"", fee:0, a, b};
+  if (p.type === "rate" && !p.value) p.value = +rate(a, b).toFixed(4);
+  openSheet(isNew ? t("addProvider") : t("editProv"), `
+    <div class="field"><label>${t("provName")}</label><input class="inp" id="pfName" value="${esc(p.name)}"></div>
+    <div class="field"><label>${t("provType")}</label><div class="seg" id="pfType"><button data-ty="rate">${t("typeRate")}</button><button data-ty="margin">${t("typeMargin")}</button></div></div>
+    <div class="field"><label id="pfValLbl"></label><input class="inp" id="pfVal" inputmode="decimal" value="${esc(p.value)}"></div>
+    <div class="field"><label>${t("feeLbl",{c:a})}</label><input class="inp" id="pfFee" inputmode="decimal" value="${esc(p.fee)}"></div>
+    <button class="btn" id="pfSave">${t("save")}</button>
+    ${isNew ? "" : `<button class="btn danger" id="pfDel">${t("del")}</button>`}`);
+  const setType = ty => { p.type = ty; $$("#pfType button").forEach(x => x.classList.toggle("on", x.dataset.ty === ty)); $("#pfValLbl").textContent = ty === "rate" ? t("rateFor",{a:S.remit.a,b:S.remit.b}) : t("marginPct"); };
+  setType(p.type);
+  $("#pfType").onclick = e => { const bt = e.target.closest("[data-ty]"); if (!bt) return; setType(bt.dataset.ty); $("#pfVal").value = bt.dataset.ty === "rate" ? +rate(S.remit.a, S.remit.b).toFixed(4) : 2; };
+  $("#pfSave").onclick = () => {
+    const v = parseFloat($("#pfVal").value), f = parseFloat($("#pfFee").value || "0");
+    if (!isFinite(v) || v < 0 || !isFinite(f)) { toast(t("invalid")); return; }
+    Object.assign(p, {name:$("#pfName").value.trim() || "—", value:v, fee:f, ex:false});
+    if (p.type === "rate") { p.a = S.remit.a; p.b = S.remit.b; }
+    const i = S.providers.findIndex(x => x.id === p.id); if (i >= 0) S.providers[i] = p; else S.providers.push(p);
+    save(); closeSheet(); renderRemit();
+  };
+  if (!isNew) $("#pfDel").onclick = () => { S.providers = S.providers.filter(x => x.id !== p.id); save(); closeSheet(); renderRemit(); };
+}
+
+/* ================= GOLD ================= */
+const VORI = 11.664, OZ = 31.1034768;
+async function renderGold(){
+  $("#goldCur").innerHTML = ["BDT","XOF","USD"].map(c => `<button data-gc="${c}" class="${S.goldCur === c ? "on" : ""}">${c}</button>`).join("");
+  const body = $("#goldBody");
+  if (!R.rates.XAU) { body.innerHTML = `<div class="empty">${t("loading")}</div>`; try { const f = await fawaz("latest"); for (const k of ["XAU","XAG"]) if (f.rates[k]) R.rates[k] = f.rates[k]; localStorage.setItem(LR, JSON.stringify(R)); } catch(e){} }
+  if (!R.rates.XAU) { body.innerHTML = `<div class="empty">${t("goldErr")}</div>`; return; }
+  const c = S.goldCur, toC = rate("USD", c);
+  const usdOz = 1 / R.rates.XAU, gGram = usdOz / OZ * toC;
+  const rows = [["24K",1],["22K",22/24],["21K",21/24],["18K",18/24]];
+  let h = `<table class="gtable"><tr><th>${S.lang === "bn" ? "ক্যারেট" : S.lang === "fr" ? "Carat" : "Karat"}</th><th>${t("perVori")}</th><th>${t("perGram")}</th></tr>`;
+  rows.forEach(([k, f]) => h += `<tr><td>${k}</td><td>${toBnDigits(fmt(gGram * f * VORI, c))}</td><td>${toBnDigits(fmt(gGram * f, c))}</td></tr>`);
+  if (R.rates.XAG) { const sGram = 1 / R.rates.XAG / OZ * toC; h += `<tr><td style="color:var(--muted)">${t("silver")}</td><td>${toBnDigits(fmt(sGram * VORI, c))}</td><td>${toBnDigits(fmt(sGram, c))}</td></tr>`; }
+  h += `</table><div class="muted small" style="margin-top:10px">1 oz 24K = ${toBnDigits(fmt(usdOz * toC, c))} ${c}</div>`;
+  body.innerHTML = h;
+}
+$("#goldCur").onclick = e => { const b = e.target.closest("[data-gc]"); if (!b) return; S.goldCur = b.dataset.gc; save(); renderGold(); };
+
+/* ================= ALERTS ================= */
+function idb(){ return new Promise((res, rej) => { const r = indexedDB.open("sarraf", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbSet(k, v){ try { const db = await idb(); await new Promise(r => { const tx = db.transaction("kv","readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = r; tx.onerror = r; }); } catch(e){} }
+async function idbGet(k){ try { const db = await idb(); return await new Promise(r => { const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = () => r(q.result); q.onerror = () => r(null); }); } catch(e){ return null; } }
+function syncAlerts(){ S.alertsTs = Date.now(); save(); idbSet("alerts", {ts:S.alertsTs, list:S.alerts, lang:S.lang}); }
+async function notify(title, body){
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  try { const reg = await navigator.serviceWorker?.ready; if (reg) { reg.showNotification(title, {body, icon:"icon-192.png", badge:"icon-192.png", tag:"sarraf-alert-" + Date.now()}); return; } } catch(e){}
+  try { new Notification(title, {body, icon:"icon-192.png"}); } catch(e){}
+}
+function checkAlerts(){
+  if (R.src === "builtin") return;
+  let hit = [];
+  S.alerts.forEach(al => {
+    if (!al.on) return;
+    const r = rate(al.a, al.b); if (!isFinite(r)) return;
+    if ((al.cond === "above" && r >= al.v) || (al.cond === "below" && r <= al.v)) {
+      al.on = false; al.hitAt = Date.now(); al.hitRate = r;
+      const msg = `1 ${al.a} = ${fmt(r, al.b, {rate:1})} ${al.b} (${al.cond === "above" ? "≥" : "≤"} ${al.v})`;
+      hit.push(msg); notify("💱 " + t("alertHit"), msg);
+    }
+  });
+  if (hit.length) { syncAlerts(); const bn = $("#alertBanner"); bn.innerHTML = `🔔 <span>${esc(hit.join(" · "))}</span><button onclick="this.parentNode.style.display='none'">✕</button>`; bn.style.display = "flex"; }
+}
+function renderAlerts(){
+  const nb = $("#btnNotif");
+  const perm = "Notification" in window ? Notification.permission : "denied";
+  nb.textContent = perm === "granted" ? t("notifOn") : perm === "denied" ? t("notifDenied") : t("notifEnable");
+  nb.disabled = perm !== "default";
+  const el = $("#alertList");
+  if (!S.alerts.length) { el.innerHTML = `<div class="empty">${t("noAlerts")}</div>`; return; }
+  el.innerHTML = S.alerts.map((al, i) => {
+    const cur = rate(al.a, al.b);
+    return `<div class="aitem"><div class="n"><b>1 ${al.a} ${al.cond === "above" ? "≥" : "≤"} ${toBnDigits(al.v)} ${al.b}</b><span>${t("current")}: ${toBnDigits(fmt(cur, al.b, {rate:1}))} ${al.b}${al.hitAt ? " · 🔔 " + esc(ago(al.hitAt)) : ""}</span></div>
+      <button class="switch${al.on ? " on" : ""}" data-at="${i}"></button><button class="tool del" data-ad="${i}">✕</button></div>`;
+  }).join("");
+}
+$("#alertList").onclick = e => {
+  const tg = e.target.closest("[data-at]"), d = e.target.closest("[data-ad]");
+  if (tg) { const al = S.alerts[+tg.dataset.at]; al.on = !al.on; if (al.on) { delete al.hitAt; } syncAlerts(); renderAlerts(); checkAlerts(); }
+  if (d) { S.alerts.splice(+d.dataset.ad, 1); syncAlerts(); renderAlerts(); }
+};
+$("#btnNotif").onclick = async () => { if ("Notification" in window) { await Notification.requestPermission(); renderAlerts(); registerPeriodic(); } };
+$("#btnAddAlert").onclick = () => {
+  const f = {a:"USD", b:"BDT", cond:"above"};
+  const draw = () => {
+    const cur = rate(f.a, f.b);
+    openSheet(t("addAlert"), `
+      <div class="pair"><button class="curbtn" id="afA">${flagHTML(f.a)}${f.a}</button><span class="muted">→</span><button class="curbtn" id="afB">${flagHTML(f.b)}${f.b}</button></div>
+      <div class="muted small" style="margin:10px 4px">${t("current")}: 1 ${f.a} = ${toBnDigits(fmt(cur, f.b, {rate:1}))} ${f.b}</div>
+      <div class="field"><label>${t("when")}</label><div class="seg" id="afC"><button data-c="above">${t("above")}</button><button data-c="below">${t("below")}</button></div></div>
+      <div class="field"><label>${t("target")} (${f.b})</label><input class="inp" id="afV" inputmode="decimal" value="${isFinite(cur) ? +(cur * (f.cond === "above" ? 1.01 : 0.99)).toPrecision(6) : ""}"></div>
+      <button class="btn" id="afSave">${t("save")}</button>`);
+    $$("#afC button").forEach(x => x.classList.toggle("on", x.dataset.c === f.cond));
+    $("#afC").onclick = e => { const b = e.target.closest("[data-c]"); if (b) { f.cond = b.dataset.c; draw(); } };
+    $("#afA").onclick = () => openPicker(c => { f.a = c; draw(); }, f.a);
+    $("#afB").onclick = () => openPicker(c => { f.b = c; draw(); }, f.b);
+    $("#afSave").onclick = async () => {
+      const v = parseFloat($("#afV").value); if (!isFinite(v) || v <= 0) { toast(t("invalid")); return; }
+      S.alerts.push({id:Date.now(), a:f.a, b:f.b, cond:f.cond, v, on:true}); syncAlerts(); closeSheet(); renderAlerts(); toast(t("alertSet"));
+      if ("Notification" in window && Notification.permission === "default") { await Notification.requestPermission(); renderAlerts(); }
+      registerPeriodic(); checkAlerts();
+    };
+  };
+  draw();
+};
+async function registerPeriodic(){
+  try {
+    const reg = await navigator.serviceWorker?.ready; if (!reg || !reg.periodicSync) return;
+    const st = await navigator.permissions.query({name:"periodic-background-sync"});
+    if (st.state === "granted") await reg.periodicSync.register("sarraf-rates", {minInterval: 4 * 3600 * 1000});
+  } catch(e){}
+}
+
+/* ================= SETTINGS ================= */
+function renderSettings(){
+  $("#setLang").value = S.lang;
+  $("#setTheme").innerHTML = ["dark","light","auto"].map(x => `<option value="${x}">${t(x)}</option>`).join(""); $("#setTheme").value = S.theme;
+  $("#setNum").innerHTML = [["intl","nsIntl"],["lakh","nsLakh"],["bn","nsBn"],["fr","nsFr"]].map(([v,k]) => `<option value="${v}">${t(k)}</option>`).join(""); $("#setNum").value = S.num;
+  $("#setWords").classList.toggle("on", S.words); $("#setAuto").classList.toggle("on", S.auto);
+}
+$("#setLang").onchange = e => { S.lang = e.target.value; save(); syncAlerts(); applyLang(); renderAll(); renderSettings(); };
+$("#setTheme").onchange = e => { S.theme = e.target.value; save(); applyTheme(); };
+$("#setNum").onchange = e => { S.num = e.target.value; save(); renderAll(); };
+$("#setWords").onclick = () => { S.words = !S.words; save(); renderSettings(); renderWords(); };
+$("#setAuto").onclick = () => { S.auto = !S.auto; save(); renderSettings(); };
+$("#btnReset").onclick = () => { if (confirm(t("confirmReset"))) { localStorage.removeItem(LS); Object.keys(localStorage).filter(k => k.startsWith(HKEY)).forEach(k => localStorage.removeItem(k)); location.reload(); } };
+function applyTheme(){
+  const dark = S.theme === "auto" ? matchMedia("(prefers-color-scheme: dark)").matches : S.theme === "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  document.querySelector('meta[name="theme-color"]').content = dark ? "#0B0C0F" : "#F4F2EE";
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", applyTheme);
+function applyLang(){ document.documentElement.lang = S.lang; DN = {}; $$("[data-t]").forEach(e => e.textContent = t(e.dataset.t)); $("#verLine").textContent = `${t("version")} ${VERSION}`; }
+
+/* ================= NAV ================= */
+let view = "convert";
+function go(v){
+  if (kpOpen) closeKeypad(true);
+  view = v;
+  $$(".view").forEach(x => x.classList.toggle("on", x.id === "v-" + v));
+  $$("#nav button").forEach(x => x.classList.toggle("on", x.dataset.v === v));
+  if (v === "more") showSub("menu");
+  renderView(); window.scrollTo({top:0});
+}
+function renderView(){ if (view === "convert") renderConvert(); else if (view === "chart") renderChart(); else if (view === "remit") renderRemit(); else if (view === "more") renderSubCurrent(); }
+let sub = "menu";
+function showSub(s){ sub = s; $$("#v-more .sub").forEach(x => x.classList.toggle("on", x.id === "s-" + s)); renderSubCurrent(); window.scrollTo({top:0}); }
+function renderSubCurrent(){ if (sub === "gold") renderGold(); if (sub === "alerts") renderAlerts(); if (sub === "history") renderHistory(); if (sub === "settings") renderSettings(); }
+$("#nav").onclick = e => { const b = e.target.closest("[data-v]"); if (b) go(b.dataset.v); };
+$("#v-more").addEventListener("click", e => { const m = e.target.closest("[data-sub]"); if (m) showSub(m.dataset.sub); if (e.target.closest(".back")) showSub("menu"); });
+$("#btnRefresh").onclick = () => refreshRates(true);
+function renderAll(){ renderView(); }
+
+/* ================= INSTALL / SW ================= */
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault(); deferredPrompt = e;
+  $("#btnInstall").style.display = "";
+  if (!localStorage.getItem("sarraf.installDismiss")) $("#installBanner").style.display = "flex";
+});
+async function doInstall(){ if (!deferredPrompt) return; deferredPrompt.prompt(); const r = await deferredPrompt.userChoice; if (r.outcome === "accepted") toast(t("installed")); deferredPrompt = null; $("#btnInstall").style.display = "none"; $("#installBanner").style.display = "none"; localStorage.setItem("sarraf.installDismiss", "1"); }
+$("#btnInstall").onclick = doInstall; $("#btnInstallBanner").onclick = doInstall;
+window.addEventListener("appinstalled", () => { $("#installBanner").style.display = "none"; registerPeriodic(); });
+window.addEventListener("online", () => { online = true; refreshRates(false); });
+window.addEventListener("offline", () => { online = false; renderStatus(); });
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").then(() => registerPeriodic()).catch(() => {});
+  navigator.serviceWorker.addEventListener?.("message", e => { if (e.data && e.data.type === "alerts") loadIdbAlerts(); });
+}
+async function loadIdbAlerts(){ const d = await idbGet("alerts"); if (d && d.ts > (S.alertsTs || 0)) { S.alerts = d.list; S.alertsTs = d.ts; save(); if (view === "more" && sub === "alerts") renderAlerts(); } }
+
+/* ================= BOOT ================= */
+applyTheme(); applyLang();
+if (!S.list.includes(S.base)) S.base = S.list[0];
+renderAll();
+loadIdbAlerts().then(() => idbSet("alerts", {ts:S.alertsTs, list:S.alerts, lang:S.lang}));
+checkAlerts();
+if (navigator.onLine && (S.auto || R.src === "builtin" || Date.now() - (R.fetched || 0) > 6 * 3600 * 1000)) refreshRates(false);
+setInterval(() => { if (navigator.onLine && Date.now() - (R.fetched || 0) > 3 * 3600 * 1000) refreshRates(false); else renderStatus(); }, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && navigator.onLine && Date.now() - (R.fetched || 0) > 3600 * 1000) refreshRates(false); });
+window.__sarraf = {evalExpr, bnWords, enWords, frWords, amountWords, rate, S};
+</script>
+</body>
+</html>
